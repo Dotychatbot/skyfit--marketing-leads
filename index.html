@@ -104,6 +104,15 @@ td.n,th.n{text-align:right}
 .tabw{overflow-x:auto}
 .form-in{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));align-items:end}
 .form-in label{margin:0}
+.papeis{display:flex;flex-direction:column;gap:10px}
+.papel{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:14px;border:1px solid var(--bd);background:#fff;font-size:17px;font-weight:700;color:var(--navy);cursor:pointer;text-align:left}
+.papel span{font-size:26px} .papel:active{background:#eef4fb}
+.papelTit{font-size:19px;font-weight:800;color:var(--navy);margin:-8px 0 14px}
+.nomes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nomeBtn{padding:18px 10px;border-radius:14px;border:1px solid var(--bd);background:#fff;font-size:17px;font-weight:700;color:var(--tx);cursor:pointer}
+.nomeBtn.ult{border:2px solid var(--navy)}
+.voltar{margin-top:18px}
+.link{background:none;border:0;color:var(--navy);text-decoration:underline;font-size:14px;cursor:pointer;margin-top:4px}
 .demo{margin-top:22px;padding:14px;border-radius:12px;background:#fff;border:2px dashed var(--navy);font-size:14px;color:var(--navy)}
 .demobtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
 .btn.ia{background:#eef4fb;border-color:#c8d9ec;color:var(--navy)}
@@ -280,6 +289,7 @@ function criarDemo(){
       chegadaEm:new Stamp(c),criadoEm:new Stamp(c),respondidoEm:new Stamp(c+20*MIN),perdidoEm:new Stamp(c+2*DIA),objecao:pick(['Preço','Vou pensar','Horário']),
       registradoPor:{uid:rec.uid,nome:rec.nome},atendidoPor:{uid:rec.uid,nome:rec.nome},historico:[{acao:'Lead registrado',por:rec.nome,em:c}]}; });
   store.config.geral={metas:{r1:8,r2:8,r3:6,r4:6},comissao:20};
+  store.config.publico={logins:DEMO_USERS.filter(u=>u.papel!=='admin').map(u=>({nome:u.nome,usuario:u.email.split('@')[0],papel:u.papel}))};
   // campanhas e resultados lançados pela agência
   const cp1=novoId(), cp2=novoId();
   store.campanhas[cp1]={nome:'Promo Outubro',plataforma:'Instagram + Facebook',status:'Ativa',objetivo:'Conversas iniciadas no WhatsApp',
@@ -498,23 +508,92 @@ auth.onAuthStateChanged(async u=>{
   }catch(e){ console.error(e); await auth.signOut(); telaLogin('Erro ao carregar acesso: '+e.message); }
 });
 
-function telaLogin(msg=''){
-  $('#app').innerHTML=`<div class="login"><div class="logo"><img src="${LOGO}" alt="Sky Fit Academia"></div><h1>Controle de Leads</h1>
+const LS={get:k=>{ try{ return localStorage.getItem('skyfit_'+k); }catch(e){ return null; } },
+  set:(k,v)=>{ try{ v==null?localStorage.removeItem('skyfit_'+k):localStorage.setItem('skyfit_'+k,v); }catch(e){} }};
+const PAPEIS_LOGIN={admin:['👑','Administrador'],recepcao:['🧾','Recepção'],agencia:['📣','Marketing']};
+let LOGINS_PUB=null;
+async function carregarLogins(){
+  if(LOGINS_PUB) return LOGINS_PUB;
+  try{ const d=await db.collection('config').doc('publico').get(); LOGINS_PUB=(d.exists&&d.data().logins)||[]; }catch(e){ LOGINS_PUB=[]; }
+  return LOGINS_PUB;
+}
+async function telaLogin(msg='',papel=LS.get('papel'),pessoa=null){
+  const topo=`<div class="logo"><img src="${LOGO}" alt="Sky Fit Academia"></div><h1>Controle de Leads</h1>`;
+  const demo=DEMO?`<div class="demo"><b>Modo demonstração</b><br>Dados fictícios, nada é salvo. Entre como:
+      <div class="demobtns">${DEMO_USERS.map(u=>`<button class="btn" data-demo="${u.email}">${u.papel==='admin'?'👑 ':''}${esc(u.nome)}</button>`).join('')}</div></div>`:'';
+  const ligarDemo=()=>document.querySelectorAll('[data-demo]').forEach(b=>b.onclick=()=>auth.signInWithEmailAndPassword(b.dataset.demo,'demo'));
+  const entrar=async(email,senha,botao)=>{
+    botao.disabled=true; botao.textContent='Entrando...';
+    try{ await auth.signInWithEmailAndPassword(email,senha); }
+    catch(err){ telaLogin(err.code==='auth/too-many-requests'?'Muitas tentativas. Espere alguns minutos e tente de novo.':'Senha incorreta.',papel,pessoa); }
+  };
+  // 1) escolha do tipo de acesso
+  if(!papel){
+    $('#app').innerHTML=`<div class="login">${topo}<p class="muted" style="margin:-10px 0 16px">Como você vai entrar?</p>
+      <div class="papeis">${Object.entries(PAPEIS_LOGIN).map(([k,[ic,t]])=>`<button class="papel" data-p="${k}"><span>${ic}</span>${t}</button>`).join('')}</div>
+      <p class="erro">${esc(msg)}</p>${demo}</div>`;
+    document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ LS.set('papel',b.dataset.p); telaLogin('',b.dataset.p); });
+    return ligarDemo();
+  }
+  const [ic,titulo]=PAPEIS_LOGIN[papel]||['','']; 
+  const voltar=`<button class="btn ghost sm voltar" id="lVoltar">← Trocar tipo de acesso</button>`;
+  // 2a) administrador: e-mail + senha + esqueci a senha
+  if(papel==='admin'){
+    $('#app').innerHTML=`<div class="login">${topo}<div class="papelTit">${ic} ${titulo}</div>
+      <form id="fLogin">
+        <input type="email" id="lEmail" placeholder="E-mail do administrador" required autocomplete="username" value="${esc(LS.get('adminEmail')||'')}">
+        <input type="password" id="lSenha" placeholder="Senha" required autocomplete="current-password">
+        <button class="btn prim big">Entrar</button>
+        <p class="erro">${esc(msg)}</p>
+      </form>
+      <button class="link" id="lEsqueci">Esqueci minha senha</button>
+      ${voltar}${demo}</div>`;
+    $('#fLogin').onsubmit=e=>{ e.preventDefault(); const em=$('#lEmail').value.trim().toLowerCase(); LS.set('adminEmail',em); entrar(em,$('#lSenha').value,e.target.querySelector('button')); };
+    $('#lEsqueci').onclick=async()=>{
+      const em=$('#lEmail').value.trim().toLowerCase();
+      if(!em||!em.includes('@')) return telaLogin('Digite o seu e-mail de administrador e toque de novo em "Esqueci minha senha".','admin');
+      try{ auth.languageCode='pt'; await auth.sendPasswordResetEmail(em); }catch(e){}
+      telaLogin('Se esse e-mail for de um administrador, chegou um link para criar uma senha nova. Confira também o spam.','admin');
+    };
+    $('#lVoltar').onclick=()=>{ LS.set('papel',null); telaLogin('',''); };
+    return ligarDemo();
+  }
+  // 2b) recepção / marketing: escolhe o nome
+  if(!pessoa){
+    $('#app').innerHTML=`<div class="login">${topo}<div class="papelTit">${ic} ${titulo}</div><p class="muted carregando">Carregando...</p></div>`;
+    const lista=(await carregarLogins()).filter(x=>x.papel===papel).sort((a,b)=>a.nome.localeCompare(b.nome));
+    const ult=LS.get('pessoa');
+    $('#app').innerHTML=`<div class="login">${topo}<div class="papelTit">${ic} ${titulo}</div>
+      <p class="muted" style="margin-bottom:12px">Toque no seu nome</p>
+      <div class="nomes">${lista.map(x=>`<button class="nomeBtn ${x.usuario===ult?'ult':''}" data-u="${esc(x.usuario)}">${esc(x.nome)}</button>`).join('')
+        ||'<p class="muted">Nenhum acesso cadastrado ainda. Fale com o administrador.</p>'}</div>
+      <p class="erro">${esc(msg)}</p>${voltar}${demo}</div>`;
+    document.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>telaLogin('',papel,lista.find(x=>x.usuario===b.dataset.u)));
+    $('#lVoltar').onclick=()=>{ LS.set('papel',null); telaLogin('',''); };
+    return ligarDemo();
+  }
+  // 3) senha da pessoa escolhida
+  $('#app').innerHTML=`<div class="login">${topo}<div class="papelTit">${ic} ${esc(pessoa.nome)}</div>
     <form id="fLogin">
-      <input type="text" id="lEmail" placeholder="Usuário" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
-      <input type="password" id="lSenha" placeholder="Senha" required autocomplete="current-password">
+      <input type="text" value="${esc(pessoa.usuario)}" autocomplete="username" style="display:none" readonly>
+      <input type="password" id="lSenha" placeholder="Sua senha" required autocomplete="current-password" autofocus>
       <button class="btn prim big">Entrar</button>
       <p class="erro">${esc(msg)}</p>
     </form>
-    ${DEMO?`<div class="demo"><b>Modo demonstração</b><br>Dados fictícios, nada é salvo. Entre como:
-      <div class="demobtns">${DEMO_USERS.map(u=>`<button class="btn" data-demo="${u.email}">${u.papel==='admin'?'👑 ':''}${esc(u.nome)}</button>`).join('')}</div></div>`:''}
-    </div>`;
-  document.querySelectorAll('[data-demo]').forEach(b=>b.onclick=()=>auth.signInWithEmailAndPassword(b.dataset.demo,'demo'));
-  $('#fLogin').onsubmit=async e=>{
-    e.preventDefault(); const b=e.target.querySelector('button'); b.disabled=true; b.textContent='Entrando...';
-    try{ await auth.signInWithEmailAndPassword(paraEmail($('#lEmail').value),$('#lSenha').value); }
-    catch(err){ telaLogin('Usuário ou senha incorretos.'); }
-  };
+    <p class="sm muted" style="margin-top:6px">Esqueceu a senha? Fale com o administrador.</p>
+    <button class="btn ghost sm voltar" id="lOutro">← Não sou ${esc(pessoa.nome)}</button></div>`;
+  $('#fLogin').onsubmit=e=>{ e.preventDefault(); LS.set('pessoa',pessoa.usuario); entrar(paraEmail(pessoa.usuario),$('#lSenha').value,e.target.querySelector('button')); };
+  $('#lOutro').onclick=()=>telaLogin('',papel);
+}
+
+// Lista pública de nomes para a tela de login (sem senhas). Só o admin atualiza.
+let _loginsJson=null;
+async function sincronizarLogins(){
+  if(S.perfil?.papel!=='admin') return;
+  const lista=S.usuarios.filter(u=>u.ativo&&u.papel!=='admin').map(u=>({nome:u.nome,usuario:mostraLogin(u.email),papel:u.papel}))
+    .sort((a,b)=>a.nome.localeCompare(b.nome));
+  const js=JSON.stringify(lista); if(js===_loginsJson) return;
+  try{ await db.collection('config').doc('publico').set({logins:lista},{merge:true}); _loginsJson=js; LOGINS_PUB=null; }catch(e){ console.warn('logins',e); }
 }
 
 /* ---------- dados ---------- */
@@ -536,7 +615,7 @@ function iniciar(){
       if(S.leadsCarregados){ const ant=new Set(S.leads.map(l=>l.id)); const ch=novos.find(l=>!ant.has(l.id)&&l.status==='novo'&&l.registradoPor?.uid!==S.perfil.uid); if(ch) avisoNovoLead(ch); }
       S.leads=novos; S.leadsCarregados=true; renderSeguro(); }, e=>toast('Erro: '+e.message)));
   if(S.perfil.papel==='admin'){
-    S.unsub.push(db.collection('usuarios').onSnapshot(q=>{ S.usuarios=q.docs.map(d=>({uid:d.id,...d.data()})); renderSeguro(); }));
+    S.unsub.push(db.collection('usuarios').onSnapshot(q=>{ S.usuarios=q.docs.map(d=>({uid:d.id,...d.data()})); sincronizarLogins(); renderSeguro(); }));
     S.unsub.push(db.collection('metricas').onSnapshot(q=>{ S.metricas=q.docs.map(d=>({id:d.id,...d.data()})); renderSeguro(); }));
     S.unsub.push(db.collection('gastos').orderBy('data','desc').onSnapshot(q=>{ S.gastos=q.docs.map(d=>({id:d.id,...d.data()})); renderSeguro(); }));
   }
@@ -1656,7 +1735,7 @@ function vConfig(){
       msgLembreteDia:$('#cLD').value,msgLembreteHora:$('#cLH').value,cadencia:porDia('#cCad'),checkins:porDia('#cCk'),
       msgRepescagem:$('#cRep').value,diasRepescagem:parseInt($('#cRepD').value)||30,comissao:parseFloat($('#cCom').value)||0,ltvMeses:parseInt($('#cLtv').value)||6,whatsAcademia:$('#cWA').value.trim(),
       planos:lista('#cPlanos').map(x=>{ const [n,v]=x.split('='); return {nome:(n||'').trim(),valor:parseFloat((v||'0').trim().replace(/\./g,'').replace(',','.'))||0}; }).filter(p=>p.nome)},{merge:true});
-    await db.collection('config').doc('publico').set({interesses:lista('#cInt'),whatsAcademia:$('#cWA').value.trim()});
+    await db.collection('config').doc('publico').set({interesses:lista('#cInt'),whatsAcademia:$('#cWA').value.trim()},{merge:true});
     toast('Ajustes salvos ✅');
   };
 }
