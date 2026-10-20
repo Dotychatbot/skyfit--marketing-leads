@@ -174,6 +174,12 @@ body.comRel #app,body.comRel .fab{display:none}
 .relCriItem img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;display:block} .relCriItem b{display:block;margin-top:3px} .relCriItem small{color:#777}
 .relCriIco{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:28px;background:#f3f4f6;border-radius:4px}
 @media(max-width:640px){.relCri{grid-template-columns:repeat(3,1fr)}}
+.okTxt{color:var(--grn)} .warnTxt{color:var(--yel)}
+.atraso{background:#fff7ed;color:#9a3412;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:600}
+.passos{background:#eef4fb;border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.5} .passos ol{margin:6px 0 0 18px}
+.impLista{display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow-y:auto}
+.impItem{border:1px solid var(--bd);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.impItem select{padding:9px;border:1px solid var(--bd);border-radius:8px;background:#fff}
 .tag{font-size:11px;padding:2px 7px;border-radius:8px;background:var(--bg)} .tag.adm{background:#dbeafe;color:var(--navy)} .tag.off{background:#fee2e2;color:var(--red)}
 </style>
 </head>
@@ -218,6 +224,7 @@ function criarDemo(){
   const snapDoc=(col,i)=>({id:i,exists:!!store[col][i],data:()=>store[col][i]?{...store[col][i]}:undefined});
   const assina=f=>{ subs.push(f); f(); return ()=>{ subs=subs.filter(x=>x!==f); }; };
   const docRef=(col,i)=>({
+    id:i,
     get:async()=>snapDoc(col,i),
     set:async(d,o)=>{ store[col][i]=aplicar(o&&o.merge?(store[col][i]||{}):{},d); notify(); },
     update:async d=>{ store[col][i]=aplicar(store[col][i]||{},d); notify(); },
@@ -294,12 +301,12 @@ function criarDemo(){
   const cp1=novoId(), cp2=novoId();
   store.campanhas[cp1]={nome:'Promo Outubro',plataforma:'Instagram + Facebook',status:'Ativa',objetivo:'Conversas iniciadas no WhatsApp',
     inicio:isoDia(new Date(agora-29*DIA)),fim:isoDia(new Date(agora+3*DIA)),orcamentoTotal:900,orcamentoDiario:30,
-    publico:'18-45 anos, todos os gêneros, raio de 5 km da unidade, interesse em academia e musculação',pixel:'Não',pixelObs:'',criativos:'Vídeo do espaço + carrossel de planos',obs:'',criadoPor:'Agência Exemplo'};
+    publico:'18-45 anos, todos os gêneros, raio de 5 km da unidade, interesse em academia e musculação',pixel:'Não',pixelObs:'',criativos:'Vídeo do espaço + carrossel de planos',obs:'',criadoPor:'Agência Exemplo',donoConta:'Agência',contaAnuncios:'act_998877665'};
   store.campanhas[cp2]={nome:'Aula experimental grátis',plataforma:'Instagram',status:'Ativa',objetivo:'Conversas iniciadas no WhatsApp',
     inicio:isoDia(new Date(agora-20*DIA)),fim:'',orcamentoTotal:0,orcamentoDiario:20,
-    publico:'18-35 anos, mulheres e homens, raio de 4 km, interesse em fitness, dança e lutas',pixel:'Sim',pixelObs:'Evento Contato',criativos:'Reels aula de Muay Thai',obs:'',criadoPor:'Agência Exemplo',
+    publico:'18-35 anos, mulheres e homens, raio de 4 km, interesse em fitness, dança e lutas',pixel:'Sim',pixelObs:'Evento Contato',pixelId:'1122334455',criativos:'Reels aula de Muay Thai',obs:'',criadoPor:'Agência Exemplo',donoConta:'Sky Fit',contaAnuncios:'act_112233445',
     retorno:{leads:8,visitas:5,matriculas:2,em:agora-6*DIA}};
-  [[cp1,'Promo Outubro',29,23,62,7,2100,4700,96],[cp1,'Promo Outubro',22,16,65,8,2300,5200,110],[cp1,'Promo Outubro',15,9,60,6,2200,5100,88],[cp1,'Promo Outubro',8,2,58,7,2400,5600,102],
+  [[cp1,'Promo Outubro',29,23,62,7,2100,4700,96],[cp1,'Promo Outubro',22,16,65,8,2300,5200,110],[cp1,'Promo Outubro',15,9,60,6,2200,5100,88],
    [cp2,'Aula experimental grátis',20,14,45,6,1500,3300,70],[cp2,'Aula experimental grátis',13,7,48,5,1600,3700,74],[cp2,'Aula experimental grátis',6,0,40,4,1400,3000,61]]
     .forEach(([id,nome,a,b,inv,cv,al,im,cl])=>store.metricas[novoId()]={campanhaId:id,campanhaNome:nome,de:isoDia(new Date(agora-a*DIA)),ate:isoDia(new Date(agora-b*DIA)),
       investimento:inv,conversas:cv,alcance:al,impressoes:im,frequencia:Math.round(im/al*100)/100,cliques:cl,custoConversa:Math.round(inv/cv*100)/100,obs:'',por:'Agência Exemplo',em:agora-b*DIA});
@@ -1291,6 +1298,9 @@ function vMarketing(){
       <div class="kpi"><div class="v">${din(T.receita1)}</div><div class="l">Vendido (1º mês)</div><div class="s">Projetado ${S.cfg.ltvMeses||6} meses: ${din(T.receitaP)}</div></div>
       <div class="kpi ${T.roiP!=null&&T.roiP<0?'ruim':'dest'}"><div class="v">${roiTxt(T.roiP)}</div><div class="l">ROI projetado</div><div class="s">ROI 1º mês: ${roiTxt(T.roi1)}</div></div>
     </div>
+    ${(()=>{ const at=C.filter(c=>atraso(c)), ag=C.filter(c=>c.status==='Ativa'&&c.donoConta!=='Sky Fit');
+      return (at.length?`<div class="box alertaBox">⏰ <b>Agência atrasada</b> em ${at.length} campanha(s) ativa(s): ${at.map(c=>esc(c.nome)).join(', ')}. Cobre o lançamento dos resultados.</div>`:'')
+        +(ag.length?`<div class="box alertaBox">🔑 ${ag.length} campanha(s) ativa(s) rodando em conta que <b>não é da Sky Fit</b>: ${ag.map(c=>esc(c.nome)).join(', ')}. Pixel e públicos ficam com quem é dono da conta.</div>`:''); })()}
     ${T.conversas&&T.aprov<0.7?`<div class="box alertaBox">⚠️ A agência informou <b>${inteiro(T.conversas)} conversas</b>, mas só <b>${inteiro(T.leads)}</b> viraram lead no app. Ou a recepção não está registrando, ou as conversas não estão sendo respondidas.</div>`:''}
     <div class="box"><h3>Resultado por campanha</h3><div class="tabw"><table class="tmk">
       <tr><th>Campanha</th><th class="n">Investido</th><th class="n">Conversas</th><th class="n">Custo/conv.</th><th class="n">Leads</th><th class="n">Aprov.</th><th class="n">Visitas</th><th class="n">Matr.</th><th class="n">Custo/lead</th><th class="n">Custo/matr.</th><th class="n">Vendido</th><th class="n">ROI 1º mês</th><th class="n">ROI proj.</th></tr>
@@ -1302,7 +1312,7 @@ function vMarketing(){
       <div class="box"><h3>Custo por conversa</h3>${barras(R.filter(x=>x.cpc).map(x=>[x.c.nome,Math.round(x.cpc*100)/100,din(x.cpc)]))}</div>
       <div class="box"><h3>Matrículas por campanha</h3>${barras(R.filter(x=>x.matr||x.leads).map(x=>[x.c.nome,x.matr,x.leads+' leads']))}</div>
     </div>
-    <div class="box" style="margin-top:12px"><div class="row"><h3 style="margin:0">Campanhas</h3><button class="btn sm prim" id="mkNova">+ Campanha</button></div>
+    <div class="box" style="margin-top:12px"><div class="row"><h3 style="margin:0">Campanhas</h3><div class="row" style="gap:6px"><button class="btn sm" id="mkImp">📥 Importar planilha</button><button class="btn sm prim" id="mkNova">+ Campanha</button></div></div>
       <div class="lista" style="margin-top:10px">${C.map(c=>cardCampanha(c,true)).join('')||'<div class="vazio">A agência ainda não cadastrou campanhas.</div>'}</div></div>
     <div class="box"><h3>🤝 Acesso da agência</h3>
       ${agencias.length?`<p class="sm">Login(s) ativo(s): ${agencias.map(a=>'<b>'+esc(a.nome)+'</b> ('+esc(a.email)+')').join(', ')}</p>`:'<p class="sm red">Nenhum login de agência. Crie em Equipe → Tipo "Agência".</p>'}
@@ -1313,6 +1323,7 @@ function vMarketing(){
   $('#relInt').onclick=()=>relatorio('interno');
   $('#relAg').onclick=()=>relatorio('agencia');
   $('#mkNova').onclick=()=>modalCampanha();
+  $('#mkImp').onclick=()=>modalImportar();
   $('#mkConvite').onclick=()=>copiar(`Olá! Segue o acesso ao painel da Sky Fit para lançar os dados das campanhas:
 ${location.href.split('?')[0].split('#')[0]}
 
@@ -1327,6 +1338,13 @@ Obrigado!`);
   vGastos('#mkOutros');
 }
 
+function atraso(c){
+  if(c.status!=='Ativa') return '';
+  const ms=(S.metricas||[]).filter(m=>m.campanhaId===c.id), ult=ms.map(m=>m.ate).sort().pop();
+  const dias=d=>Math.floor((new Date(isoDia(new Date())+'T00:00')-new Date(d+'T00:00'))/86400000);
+  if(!ult){ return c.inicio&&dias(c.inicio)>=7?`Nenhum resultado lançado desde o início (${dias(c.inicio)} dias)`:''; }
+  const d=dias(ult); return d>=7?`Sem resultado lançado há ${d} dias (último até ${diaBR(ult)})`:'';
+}
 function cardCampanha(c,adm){
   const ms=(S.metricas||[]).filter(m=>m.campanhaId===c.id).sort((a,b)=>(b.de||'').localeCompare(a.de||''));
   const inv=ms.reduce((s,m)=>s+(+m.investimento||0),0), conv=ms.reduce((s,m)=>s+(+m.conversas||0),0);
@@ -1337,7 +1355,9 @@ function cardCampanha(c,adm){
     <div class="sm">📅 ${diaBR(c.inicio)||'?'} a ${diaBR(c.fim)||'sem data de fim'}${c.orcamentoTotal||c.orcamentoDiario?' · 💰 '+[c.orcamentoTotal?moeda(c.orcamentoTotal)+' total':'',c.orcamentoDiario?moeda(c.orcamentoDiario)+'/dia':''].filter(Boolean).join(' · '):''}</div>
     ${c.publico?`<div class="sm">🎯 ${esc(c.publico)}</div>`:''}
     ${(c.criativosArq||[]).length?`<div class="thumbs">${(c.criativosArq||[]).slice(0,4).map(miniatura).join('')}${(c.criativosArq||[]).length>4?`<span class="mais">+${c.criativosArq.length-4}</span>`:''}</div>`:''}
-    <div class="sm">Pixel: <b>${esc(c.pixel||'—')}</b>${c.pixelObs?' · '+esc(c.pixelObs):''}</div>
+    <div class="sm">Conta de anúncios: <b class="${c.donoConta==='Sky Fit'?'okTxt':'warnTxt'}">${esc(c.donoConta||'não informado')}</b>${c.contaAnuncios?' · '+esc(c.contaAnuncios):''}</div>
+    <div class="sm">Pixel: <b>${esc(c.pixel||'—')}</b>${c.pixelId?' · ID '+esc(c.pixelId):''}${c.pixelObs?' · '+esc(c.pixelObs):''}</div>
+    ${atraso(c)?`<div class="atraso">⏰ ${atraso(c)}</div>`:''}
     <div class="sm muted">Lançado até agora: ${moeda(inv)} · ${inteiro(conv)} conversas · ${ms.length} período(s)</div>
     ${r?`<div class="retorno">📬 Retorno da academia (${new Date(r.em).toLocaleDateString('pt-BR')}): <b>${r.leads}</b> leads registrados · <b>${r.visitas}</b> visitas · <b>${r.matriculas}</b> matrículas</div>`:''}
     <div class="acoes">${Bt('mres','📈 Lançar resultado','prim')}${Bt('mhist','Resultados ('+ms.length+')')}${Bt('mcri','🖼 Criativos ('+(c.criativosArq||[]).length+')')}${Bt('medit','✏️ Editar')}
@@ -1372,8 +1392,11 @@ function modalCampanha(c={}){
     <div class="grid2"><label>Orçamento total (R$)<input type="number" step="0.01" inputmode="decimal" id="cpOT" value="${c.orcamentoTotal||''}"></label>
       <label>Orçamento diário (R$)<input type="number" step="0.01" inputmode="decimal" id="cpOD" value="${c.orcamentoDiario||''}"></label></div>
     <label>Público (idade, gênero, região/raio, interesses)<textarea id="cpPub" rows="3" placeholder="Ex: 18-45 anos, todos os gêneros, raio de 5 km da unidade, interesse em academia/musculação">${esc(c.publico||'')}</textarea></label>
+    <div class="grid2"><label>De quem é a conta de anúncios?<select id="cpDono">${opts(['Agência','Sky Fit','Não sei'],c.donoConta||'Agência')}</select></label>
+      <label>ID da conta de anúncios<input id="cpConta" inputmode="numeric" value="${esc(c.contaAnuncios||'')}" placeholder="act_123456789"></label></div>
     <div class="grid2"><label>Usa pixel / API de conversões?<select id="cpPx">${opts(['Sim','Não','Não se aplica'],c.pixel||'Não')}</select></label>
-      <label>Evento / detalhe do pixel<input id="cpPxO" value="${esc(c.pixelObs||'')}" placeholder="Ex: Lead, Contato"></label></div>
+      <label>ID do pixel / conjunto de dados<input id="cpPxId" inputmode="numeric" value="${esc(c.pixelId||'')}" placeholder="Ex: 1234567890"></label></div>
+    <label>Evento do pixel / detalhe<input id="cpPxO" value="${esc(c.pixelObs||'')}" placeholder="Ex: Contato, Lead"></label>
     <label>Descrição dos criativos (os arquivos e links vão em 🖼 Criativos)<textarea id="cpCri" rows="2">${esc(c.criativos||'')}</textarea></label>
     <label>Observações<textarea id="cpObs" rows="2">${esc(c.obs||'')}</textarea></label>
     <div class="row" style="margin-top:12px"><button type="button" class="btn ghost" data-fechar>Cancelar</button><button class="btn prim" style="flex:1">Salvar campanha</button></div>
@@ -1382,7 +1405,7 @@ function modalCampanha(c={}){
       e.preventDefault();
       const d={nome:$('#cpNome').value.trim(),plataforma:$('#cpPlat').value,status:$('#cpSt').value,objetivo:$('#cpObj').value.trim(),
         inicio:$('#cpIni').value,fim:$('#cpFim').value,orcamentoTotal:numIn('#cpOT'),orcamentoDiario:numIn('#cpOD'),
-        publico:$('#cpPub').value.trim(),pixel:$('#cpPx').value,pixelObs:$('#cpPxO').value.trim(),criativos:$('#cpCri').value.trim(),obs:$('#cpObs').value.trim(),
+        publico:$('#cpPub').value.trim(),pixel:$('#cpPx').value,pixelObs:$('#cpPxO').value.trim(),pixelId:$('#cpPxId').value.trim(),donoConta:$('#cpDono').value,contaAnuncios:$('#cpConta').value.trim(),criativos:$('#cpCri').value.trim(),obs:$('#cpObs').value.trim(),
         atualizadoPor:S.perfil.nome,atualizadoEm:Date.now()};
       try{ if(novo) await db.collection('campanhas').add({...d,criadoPor:S.perfil.nome}); else await db.collection('campanhas').doc(c.id).update(d);
         fecharModal(); toast('Campanha salva ✅'); }catch(err){ toast('Erro: '+err.message); }
@@ -1493,14 +1516,142 @@ function modalCriativos(c){
   });
 }
 
+
+/* ---------- importar planilha exportada do Gerenciador de Anúncios ---------- */
+const semAcento=t=>String(t??'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+const COLUNAS={
+  campanha:['nome da campanha','campaign name'],
+  de:['inicio dos relatorios','reporting starts','dia','day','data'],
+  ate:['termino dos relatorios','reporting ends'],
+  investimento:['valor usado','amount spent','valor gasto'],
+  alcance:['alcance','reach'],
+  impressoes:['impressoes','impressions'],
+  frequencia:['frequencia','frequency'],
+  cliques:['cliques no link','link clicks','cliques (todos)','clicks (all)'],
+  conversas:['conversas por mensagem iniciadas','messaging conversations started','conversas iniciadas'],
+  resultados:['resultados','results'], indicador:['indicador de resultado','result indicator','tipo de resultado','result type']
+};
+function acharColuna(cab,chave){
+  const alvos=COLUNAS[chave], h=cab.map(semAcento);
+  for(const a of alvos){ const i=h.findIndex(x=>x===a||x.startsWith(a+' (')||x.startsWith(a)); if(i>=0) return i; }
+  return -1;
+}
+function numMeta(v){
+  if(typeof v==='number') return v; let t=String(v??'').replace(/[^\d.,-]/g,''); if(!t) return 0;
+  const p=t.lastIndexOf('.'), c=t.lastIndexOf(',');
+  if(p>=0&&c>=0) t=c>p?t.replace(/\./g,'').replace(',','.'):t.replace(/,/g,'');
+  else if(c>=0) t=(t.length-c-1===3&&t.split(',').length>1&&!/^0,/.test(t))?t.replace(/,/g,''):t.replace(',','.');
+  else if(p>=0&&t.split('.').length>2) t=t.replace(/\./g,'');
+  const n=parseFloat(t); return isNaN(n)?0:n;
+}
+function dataMeta(v){
+  if(v instanceof Date) return isoDia(v);
+  if(typeof v==='number'){ const d=new Date(Math.round((v-25569)*86400000)); return isoDia(new Date(d.getTime()+d.getTimezoneOffset()*60000)); }
+  const t=String(v??'').trim(); let m;
+  if((m=t.match(/^(\d{4})-(\d{2})-(\d{2})/))) return `${m[1]}-${m[2]}-${m[3]}`;
+  if((m=t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return '';
+}
+function lerCSV(txt){
+  txt=txt.replace(/^﻿/,''); const lin1=txt.split(/\r?\n/)[0]||'';
+  const sep=[',',';','\t'].sort((a,b)=>lin1.split(b).length-lin1.split(a).length)[0];
+  const linhas=[]; let row=[], cell='', q=false;
+  for(let i=0;i<txt.length;i++){ const ch=txt[i];
+    if(q){ if(ch==='"'){ if(txt[i+1]==='"'){ cell+='"'; i++; } else q=false; } else cell+=ch; }
+    else if(ch==='"') q=true; else if(ch===sep){ row.push(cell); cell=''; }
+    else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&txt[i+1]==='\n') i++; row.push(cell); linhas.push(row); row=[]; cell=''; }
+    else cell+=ch; }
+  if(cell||row.length){ row.push(cell); linhas.push(row); }
+  return linhas.filter(r=>r.some(c=>String(c).trim()));
+}
+let _xlsx=null;
+function carregarXLSX(){ return _xlsx||(_xlsx=new Promise((ok,erro)=>{ if(window.XLSX) return ok(window.XLSX);
+  const sc=document.createElement('script'); sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  sc.onload=()=>ok(window.XLSX); sc.onerror=()=>{ _xlsx=null; erro(new Error('Não foi possível abrir arquivos Excel agora. Exporte em CSV.')); }; document.head.appendChild(sc); })); }
+async function lerArquivo(f){
+  if(/\.(xlsx|xls)$/i.test(f.name)){ const X=await carregarXLSX(); const wb=X.read(await f.arrayBuffer(),{type:'array',cellDates:true});
+    return X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''}); }
+  return lerCSV(await f.text());
+}
+function interpretar(tab){
+  const iCab=tab.findIndex(r=>r.some(c=>['nome da campanha','campaign name'].includes(semAcento(c))));
+  if(iCab<0) throw new Error('Não encontrei a coluna "Nome da campanha". Exporte a tabela no nível de Campanhas.');
+  const cab=tab[iCab], col={}; Object.keys(COLUNAS).forEach(k=>col[k]=acharColuna(cab,k));
+  if(col.investimento<0) throw new Error('Não encontrei a coluna "Valor usado". Inclua essa coluna na exportação.');
+  const pega=(r,k)=>col[k]>=0?r[col[k]]:'';
+  const hoje=isoDia(new Date());
+  return tab.slice(iCab+1).map(r=>{
+    const nome=String(pega(r,'campanha')||'').trim(); if(!nome) return null;
+    const ind=semAcento(pega(r,'indicador'));
+    let conv=col.conversas>=0?numMeta(pega(r,'conversas')):0;
+    if(!conv && col.resultados>=0 && /messaging|conversa|mensage/.test(ind)) conv=numMeta(pega(r,'resultados'));
+    const de=dataMeta(pega(r,'de'))||'', ate=dataMeta(pega(r,'ate'))||de||hoje;
+    const alc=numMeta(pega(r,'alcance')), imp=numMeta(pega(r,'impressoes'));
+    return {nome,de:de||ate,ate,investimento:Math.round(numMeta(pega(r,'investimento'))*100)/100,conversas:Math.round(conv),alcance:Math.round(alc),impressoes:Math.round(imp),
+      frequencia:numMeta(pega(r,'frequencia'))||(alc&&imp?Math.round(imp/alc*100)/100:0),cliques:Math.round(numMeta(pega(r,'cliques')))};
+  }).filter(x=>x&&(x.investimento||x.impressoes||x.conversas));
+}
+function modalImportar(){
+  abrirModal(`<h2>📥 Importar planilha do Meta</h2>
+    <div class="passos sm"><b>Como exportar no Gerenciador de Anúncios:</b>
+      <ol><li>Abra a aba <b>Campanhas</b> e escolha o período (ex: semana passada).</li>
+      <li>Use colunas que tenham: <b>Valor usado, Alcance, Impressões, Frequência, Cliques no link</b> e <b>Conversas por mensagem iniciadas</b> (ou Resultados).</li>
+      <li>Toque em <b>Exportar → Exportar dados da tabela</b>, em CSV ou Excel.</li></ol></div>
+    <label class="upl"><input type="file" id="impArq" accept=".csv,.xlsx,.xls,text/csv" style="display:none"><span class="btn prim full">📎 Escolher arquivo</span></label>
+    <div id="impOut"></div>
+    <button class="btn ghost full" data-fechar style="margin-top:12px">Fechar</button>`,()=>{
+    $('#impArq').onchange=async e=>{
+      const f=e.target.files[0]; e.target.value=''; if(!f) return;
+      $('#impOut').innerHTML='<p class="carregando">Lendo planilha...</p>';
+      try{ const linhas=interpretar(await lerArquivo(f)); if(!linhas.length) throw new Error('Nenhuma linha com valores encontrada.'); previaImport(linhas,f.name); }
+      catch(err){ $('#impOut').innerHTML=`<p class="erro">${esc(err.message)}</p>`; }
+    };
+  });
+}
+function previaImport(linhas,arquivo){
+  const C=campanhasOrdenadas(), porNome=n=>C.find(c=>semAcento(c.nome)===semAcento(n));
+  const opcoes=(l)=>{ const m=porNome(l.nome);
+    return `<option value="novo" ${!m?'selected':''}>➕ Criar campanha "${esc(l.nome)}"</option>${C.map(c=>`<option value="${c.id}" ${m&&m.id===c.id?'selected':''}>${esc(c.nome)}</option>`).join('')}<option value="ignorar">✕ Não importar</option>`; };
+  const dup=(l,cid)=>(S.metricas||[]).find(m=>m.campanhaId===cid&&m.de===l.de&&m.ate===l.ate);
+  $('#impOut').innerHTML=`<p class="sm" style="margin:10px 0">Arquivo <b>${esc(arquivo)}</b>: ${linhas.length} linha(s). Confira antes de importar:</p>
+    <div class="impLista">${linhas.map((l,i)=>{ const m=porNome(l.nome), d=m&&dup(l,m.id);
+      return `<div class="impItem"><div class="row"><b>${esc(l.nome)}</b><span class="sm muted">${diaBR(l.de)} a ${diaBR(l.ate)}</span></div>
+        <div class="sm">${moeda(l.investimento)} · <b>${inteiro(l.conversas)}</b> conversas · ${l.conversas?moeda(l.investimento/l.conversas)+'/conversa':'—'} · alcance ${inteiro(l.alcance)} · freq. ${dec(l.frequencia)}</div>
+        <select data-imp="${i}">${opcoes(l)}</select>${d?'<div class="sm warnTxt">Já existe resultado desse período: vai ser atualizado.</div>':''}</div>`; }).join('')}</div>
+    <button class="btn prim full" id="impOk" style="margin-top:12px">✅ Importar</button>`;
+  $('#impOk').onclick=async()=>{
+    const b=$('#impOk'); b.disabled=true; b.textContent='Importando...';
+    let n=0; const criadas={};
+    try{
+      for(const [i,l] of linhas.entries()){
+        let cid=$(`[data-imp="${i}"]`).value; if(cid==='ignorar') continue;
+        let nomeC=l.nome;
+        if(cid==='novo'){ const k=semAcento(l.nome);
+          if(!criadas[k]){ const ref=await db.collection('campanhas').add({nome:l.nome,plataforma:PLATAFORMAS[0],status:'Ativa',objetivo:'Conversas iniciadas no WhatsApp',
+              inicio:l.de,fim:'',orcamentoTotal:0,orcamentoDiario:0,publico:'',pixel:'Não',pixelObs:'',criativos:'',obs:'Criada pela importação',donoConta:'Agência',
+              criadoPor:S.perfil.nome,atualizadoPor:S.perfil.nome,atualizadoEm:Date.now()}); criadas[k]=ref.id; }
+          cid=criadas[k]; }
+        else nomeC=(C.find(c=>c.id===cid)||{}).nome||l.nome;
+        const d={campanhaId:cid,campanhaNome:nomeC,de:l.de,ate:l.ate,investimento:l.investimento,conversas:l.conversas,alcance:l.alcance,impressoes:l.impressoes,
+          frequencia:l.frequencia,cliques:l.cliques,custoConversa:l.conversas?Math.round(l.investimento/l.conversas*100)/100:0,obs:'Importado de '+arquivo,por:S.perfil.nome,em:Date.now(),importado:true};
+        const ex=dup(l,cid);
+        if(ex) await db.collection('metricas').doc(ex.id).update(d); else await db.collection('metricas').add(d);
+        n++;
+      }
+      fecharModal(); toast(`${n} resultado(s) importado(s) 📥`);
+    }catch(err){ b.disabled=false; b.textContent='✅ Importar'; toast('Erro: '+err.message); }
+  };
+}
+
 /* ---------- área da agência ---------- */
 function vAgencia(){
   const C=campanhasOrdenadas();
   $('#main').innerHTML=`<div class="box"><h3>Olá, ${esc(S.perfil.nome)} 👋</h3>
       <p class="sm">Aqui você cadastra as campanhas da Sky Fit e lança os resultados do Gerenciador de Anúncios. Lance por período (ex: toda segunda-feira, a semana anterior).</p></div>
-    <button class="btn prim big" id="agNova" style="margin-bottom:12px">+ Nova campanha</button>
+    <div class="row" style="margin-bottom:12px;flex-wrap:nowrap"><button class="btn prim big" id="agNova" style="flex:1">+ Nova campanha</button><button class="btn big" id="agImp" style="flex:1">📥 Importar planilha do Meta</button></div>
     <div class="lista">${C.map(c=>cardCampanha(c,false)).join('')||'<div class="vazio">Nenhuma campanha ainda. Comece cadastrando a primeira.</div>'}</div>`;
   $('#agNova').onclick=()=>modalCampanha();
+  $('#agImp').onclick=()=>modalImportar();
   ligarCardsCampanha('#main');
 }
 
