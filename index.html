@@ -194,6 +194,10 @@ body.comRel #app,body.comRel .fab{display:none}
 .ico{padding:5px 7px!important;font-size:15px!important} .unome{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:420px){.unome{display:none}}
 .dono{font-weight:700;color:var(--navy)} .dono.meu{color:var(--grn)}
+.atendOn{font-size:13px;background:#e8f5e9;color:#1b5e20;border-radius:8px;padding:4px 8px;margin:4px 0;display:inline-block} .atendOn.meu{background:#c8e6c9;font-weight:600}
+.iaThumbs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0} .iaThumbs img{height:110px;border-radius:8px;border:1px solid var(--bd)}
+.chMsgs{max-height:48vh;overflow:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px}
+.chMsg{padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.45;max-width:92%} .chMsg.user{background:var(--navy);color:#fff;align-self:flex-end} .chMsg.assistant{background:var(--bg);align-self:flex-start}
 .dupBox{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px;margin:-4px 0 10px;font-size:13px;display:flex;flex-direction:column;gap:6px}
 .donoBox{background:var(--bg);border-radius:10px;padding:10px;margin-top:8px} .selSm{flex:1;padding:6px;border:1px solid var(--bd);border-radius:8px;background:#fff;min-width:0}
 .audLista{list-style:none;display:flex;flex-direction:column} .audL,.audLista li{padding:8px 0;border-bottom:1px solid var(--bd);font-size:13px;cursor:pointer}
@@ -338,6 +342,10 @@ function criarDemo(){
         L.conversa=`[${hora(new Date(c))}] ${nome.split(' ')[0]}: Oi, vi o anúncio de vocês. Quanto tá a mensalidade?\n[${hora(new Date(r))}] ${rec.nome}: Oi ${nome.split(' ')[0]}! Temos planos a partir de R$ 119,90. Você procura ${L.interesse.toLowerCase()}?\n[${hora(new Date(r+3*MIN))}] ${nome.split(' ')[0]}: Isso. Mas achei meio caro, vou pensar e te aviso`; L.historico.push({acao:'Retornar em '+diaBR(L.followUp),por:rec.nome,em:r+10*MIN}); }
     }
     if(L.status==='agendado'){ const v=new Date(agora+pick([2,5,26,29,50,74])*3600000); v.setMinutes(pick([0,30]),0,0); L.agendaPara=localInput(v); }
+    if(L.respondidoEm){ const r0=L.respondidoEm.toMillis(), d1=3+Math.round(Math.random()*20);
+      L.atendimentos=[{uid:por.uid,nome:por.nome,ini:r0,fim:r0+d1*MIN,dur:d1,res:L.status==='agendado'||L.etapaMax>=2?'Agendou visita':'Só conversamos'}];
+      if(L.fechadoPor&&L.fechadoPor.uid!==por.uid){ const i2=c+DIA+10*MIN; L.atendimentos.push({uid:L.fechadoPor.uid,nome:L.fechadoPor.nome,ini:i2,fim:i2+20*MIN,dur:20,res:'Matriculou'}); }
+      if(L.status==='respondido'&&!window._atDemo){ window._atDemo=1; L.emAtendimento={uid:por.uid,nome:por.nome,ini:agora-6*MIN}; } }
     store.leads[novoId()]=L;
   });
   // perdidos antigos para a repescagem
@@ -352,7 +360,7 @@ function criarDemo(){
       store.notas[ma+'_'+uid]={uid,nome,mes:ma,crit:{atendimento:Math.round(m),proatividade:Math.round(m),organizacao:Math.round(m)},media:m,comentario:com,por:'Administrador',em:agora-10*DIA}; });
     store.bonus['bn1']={uid:'r2',nome:'Bruna',mes:mk,valor:50,motivo:'Melhor tempo de resposta',por:'Administrador',em:agora-DIA};
     Object.values(store.leads).filter(l=>l.atendidoPor&&l.respondidoEm).slice(0,25).forEach((l,i)=>{ const t=agora-(i%6)*3600000-i*60000; l.historico.push({acao:'Abriu o WhatsApp do cliente',por:l.atendidoPor.nome,uid:l.atendidoPor.uid,em:t}); }); }
-  store.config.geral={metas:{r1:8,r2:8,r3:6,r4:6},metaEquipe:20,comAtivo:true,comTipo:'fixo',comValor:20,comPorPlano:'Anual (12x) = 30',comSplit:30,comBonus:100,comCarencia:7,metaCPC:9,metaCPL:15,metaCAC:70,ultimoBackup:agora-40*DIA};
+  store.config.geral={metas:{r1:8,r2:8,r3:6,r4:6},metaEquipe:20,comAtivo:true,comTipo:'fixo',comValor:20,comPorPlano:'Anual (12x) = 30',comSplit:30,comSplitAg:50,comBonus:100,comCarencia:7,metaCPC:9,metaCPL:15,metaCAC:70,ultimoBackup:agora-40*DIA};
   [['Roberta Campos','(19) 99711-2233',62],['Felipe Arantes','(19) 99822-3344',95],['Sônia Prado','(19) 99633-4455',40],['Wagner Luz','(19) 99544-5566',130]]
     .forEach(([nome,w,d])=>store.exalunos[novoId()]={nome,whatsapp:w,saida:isoDia(new Date(agora-d*DIA)),status:'aguardando',criadoEm:agora-5*DIA,por:'Administrador',contatos:[]});
   store.lixeira['lx1']={nome:'Teste Recepção',whatsapp:'(19) 90000-0000',origem:'Outro',interesse:'Musculação',status:'novo',etapaMax:0,chegadaEm:new Stamp(agora-3*DIA),historico:[{acao:'Lead registrado',por:'Carla',em:agora-3*DIA}],
@@ -436,7 +444,7 @@ const CONFIG_PADRAO = {
   motivosDesq:['Nunca respondeu','Só curiosidade','Mora longe / outra cidade','Procurava outro serviço','Menor de idade','Número errado / spam','Outro'],
   metaCPC:0, metaCPL:0, metaCAC:0, freqMax:3,
   msgAnuncio:'Olá! Vi o anúncio da Sky Fit e quero agendar minha aula experimental 💪 #{codigo}',
-  comTipo:'fixo', comPct:10, comPorPlano:'', comSplit:0, comBonus:0, comCarencia:0,
+  comTipo:'fixo', comPct:10, comPorPlano:'', comSplit:30, comSplitAg:50, comBonus:0, comCarencia:0,
   motivosCancel:['Financeiro','Falta de tempo','Mudou de cidade/bairro','Saúde / lesão','Insatisfeito com a academia','Foi para outra academia','Outro'],
   diasReconquista:30,
   msgReconquista:'Oi {nome}, tudo bem? Aqui é {recep}, da Sky Fit 😊 Sentimos sua falta por aqui! Que tal voltar a treinar? Sem taxa de matrícula e com avaliação física para recomeçar com tudo. Posso te passar os planos?',
@@ -842,10 +850,12 @@ function vLeads(){
   $('#main').innerHTML=`${meta?`<div class="meta"><div class="row sm"><b>🎯 Sua meta do mês</b><span><b>${feitas}</b> de ${meta} matrículas</span></div>
       <div class="bt"><div style="width:${Math.min(100,feitas/meta*100)}%"></div></div>
       ${comAtiva()?(()=>{ const c=minhaComissaoMes(); return `<div class="sm muted">Sua comissão no mês: <b>${moeda(c.total)}</b>${c.aLiberar?` · ${moeda(c.aLiberar)} aguardando carência`:''}${c.bonus?' · inclui bônus da meta 🎉':''}</div>`; })():''}</div>`:''}
+    ${mod('ia')?'<div class="row" style="justify-content:flex-end;margin-bottom:8px"><button class="btn sm ia" id="coachB">🎓 Coach de vendas</button></div>':''}
     <div class="chips" id="chips"></div>
     <input class="busca" id="busca" placeholder="🔍 Buscar por nome ou telefone" value="${esc(S.busca)}">
     <div id="lista"></div>`;
   $('#busca').oninput=e=>{ S.busca=e.target.value; renderLista(); };
+  if($('#coachB')) $('#coachB').onclick=modalCoach;
   $('#chips').onclick=e=>{ const c=e.target.closest('[data-f]'); if(c){ S.filtro=c.dataset.f; renderLista(); } };
   $('#lista').onclick=e=>{
     const b=e.target.closest('[data-a]'); if(!b) return;
@@ -888,6 +898,7 @@ function card(l){
     ${l.indicadoPor?`<div class="sm">🤝 Indicado por <b>${esc(l.indicadoPor)}</b></div>`:''}
     <div class="row sm"><span>Chegou ${dataBR(ch)} às ${hora(ch)}</span>${tempo}</div>
     ${donoDe(l)?`<div class="sm muted"><span class="dono ${ehMeu(l)?'meu':''}">👤 ${ehMeu(l)?'Seu lead':'Lead da '+esc(donoDe(l).nome)}</span>${l.atendidoPor&&l.atendidoPor.uid!==donoDe(l).uid?` · atendeu: <b>${esc(l.atendidoPor.nome)}</b>`:''}${l.fechadoPor?` · fechou: <b>${esc(l.fechadoPor.nome)}</b>`:''}</div>`:''}
+    ${(()=>{ const a=sessaoAtiva(l); return a?`<div class="atendOn ${a.uid===S.perfil.uid?'meu':''}">🟢 Em atendimento com <b>${a.uid===S.perfil.uid?'você':esc(a.nome)}</b> desde ${hora(new Date(a.ini))}</div>`:''; })()}
     ${(S.dups||{})[chaveTel(l.whatsapp)]>1?`<div class="sm warnTxt">⚠️ Telefone repetido em outro lead</div>`:''}
     ${l.status==='agendado'&&ag?`<div class="sm">🗓 Visita: ${dataBR(ag)} às ${hora(ag)}</div>`:''}
     ${l.status==='perdido'?`<div class="sm ${desq(l)?'muted':'red'}">${desq(l)?'🚫 Desqualificado':'Objeção'}: ${esc(l.objecao||'—')}${l.obsPerda?' — '+esc(l.obsPerda):''}</div>`:''}
@@ -912,15 +923,17 @@ function acoes(l){
   const fu = l.followUp && !fechado(l) ? B('fuok','✔ Retornei') : '';
   const li=lembreteInfo(l), cp=cadPendente(l);
   const extra=(li&&!li.feito?B('lemb','🔔 Lembrete','prim'):'')+(cp?B('cad','📨 Enviar dia '+cp.dia,'prim'):'')+(podeRepescar(l)?B('repescar','♻️ Repescar','prim'):'');
-  return wa + extra + porStatus.join('') + fu + (fechado(l)?'':B('perdido','❌ Perdido','danger')) + B('resp','💬','ia') + (mod('ia')?B('ia','🤖 IA','ia'):'') + B('detalhes','⋯','ghost');
+  const at=sessaoAtiva(l), bAt=at?(at.uid===S.perfil.uid?B('fimat','⏹ Finalizar','prim'):B('iniat','▶ Assumir')):(fechado(l)?'':B('iniat','▶ Atender'));
+  return bAt + wa + extra + porStatus.join('') + fu + (fechado(l)?'':B('perdido','❌ Perdido','danger')) + B('resp','💬','ia') + (mod('ia')?B('ia','🤖 IA','ia'):'') + B('detalhes','⋯','ghost');
 }
 
 async function acao(id,a){
   const l=S.leads.find(x=>x.id===id); if(!l) return;
   S.ctxLead=l;
-  if(!['detalhes','resp','ia'].includes(a) && !confirmaOutro(l)) return;
+  if(!['detalhes','resp','ia','fimat'].includes(a) && !S.pulaConf && !confirmaOutro(l)) return;
+  S.pulaConf=false;
   const ref=db.collection('leads').doc(id);
-  const avanca=(st,extra={},txt)=>ref.update({status:st, etapaMax:Math.max(l.etapaMax||0,ETAPAS.indexOf(st)), ...extra, historico:FV.arrayUnion(hist(txt||ROTULO[st]))});
+  const avanca=(st,extra={},txt)=>ref.update({status:st, etapaMax:Math.max(l.etapaMax||0,ETAPAS.indexOf(st)), ...(['agendado','matriculado'].includes(st)?fechaMinha(S.leads.find(x=>x.id===id)||l,ROTULO[st]):{}), ...extra, historico:FV.arrayUnion(hist(txt||ROTULO[st]))});
   const garanteResp = () => l.respondidoEm ? {} : {respondidoEm:TS.now(), atendidoPor:eu(), ...(l.dono?{}:{dono:eu()})};
   try{
     switch(a){
@@ -936,6 +949,8 @@ async function acao(id,a){
       case 'reabrir':
         await ref.update({status:l.respondidoEm?'respondido':'novo', desqualificado:false, historico:FV.arrayUnion(hist('Lead reaberto'))}); toast('Lead reaberto'); break;
       case 'detalhes': return modalDetalhes(l);
+      case 'iniat': { const at=sessaoAtiva(l); if(at&&at.uid!==S.perfil.uid&&!confirm(`${at.nome} está atendendo esse cliente desde ${hora(new Date(at.ini))}.\n\nAssumir o atendimento?`)) return; return iniciarAtend(l,ref); }
+      case 'fimat': return modalFimAtend(l,ref);
       case 'ia': return modalIA(l);
       case 'resp': return modalRespostas(l);
       case 'lemb': { const li=lembreteInfo(l); if(!li) return;
@@ -1091,7 +1106,7 @@ function modalPerdido(l,ref){
       $('#pLista').innerHTML=pills(tipo==='desq'?S.cfg.motivosDesq:S.cfg.objecoes); };
     $('#pOk').onclick=async()=>{
       const obj=pillSel('objecao'); if(!obj) return toast(tipo==='desq'?'Escolha o motivo':'Escolha a objeção');
-      await ref.update({status:'perdido',perdidoEm:TS.now(),objecao:obj,desqualificado:tipo==='desq',qualificado:tipo==='desq'?false:(l.qualificado||false),
+      await ref.update({status:'perdido',perdidoEm:TS.now(),objecao:obj,...fechaMinha(S.leads.find(x=>x.id===l.id)||l,'Perdido'),desqualificado:tipo==='desq',qualificado:tipo==='desq'?false:(l.qualificado||false),
         obsPerda:$('#pObs').value.trim(),followUp:FV.delete(),historico:FV.arrayUnion(hist((tipo==='desq'?'Desqualificado: ':'Perdido: ')+obj))});
       fecharModal(); toast('Registrado');
     };
@@ -1131,6 +1146,7 @@ function modalDetalhes(l){
       <label>Respondido em<input type="datetime-local" id="eResp" value="${r?localInput(r):''}"></label></div>
     <label>Observação<textarea id="eObs">${esc(l.obs||'')}</textarea></label>
     <p class="sm muted">Registrado por ${esc(l.registradoPor?.nome||'—')}${l.atendidoPor?' · Atendido por '+esc(l.atendidoPor.nome):''}${l.fechadoPor?' · Fechou: '+esc(l.fechadoPor.nome):''}</p>
+    ${sessoesDe(l).length?`<div class="sm boxIn"><b>⏱ Atendimentos (${sessoesDe(l).length})</b>${sessoesDe(l).sort((a,b)=>a.ini-b.ini).map(x=>`<div>${dataBR(new Date(x.ini))} · ${hora(new Date(x.ini))}–${hora(new Date(x.fim))} · <b>${esc(x.nome)}</b> · ${fmtMin(x.dur)}${x.res?' · <span class="muted">'+esc(x.res)+'</span>':''}</div>`).join('')}</div>`:''}
     <div class="donoBox"><div class="sm">👤 Responsável: <b>${esc(donoDe(l)?.nome||'ninguém ainda')}</b></div>
       <div class="row" style="gap:6px;margin-top:6px">${S.perfil.papel!=='agencia'&&!ehMeu(l)?'<button type="button" class="btn sm" id="dPegar">Passar para mim</button>':''}<select id="dPara" class="selSm"><option value="">Transferir para…</option></select><button type="button" class="btn sm" id="dTransf">Transferir</button></div></div>
     <div class="row" style="margin-top:12px"><button type="button" class="btn ghost" data-fechar>Fechar</button><button class="btn prim" style="flex:1">Salvar alterações</button></div>
@@ -1265,6 +1281,7 @@ async function telaForm(preview=false){
       <label class="check"><input type="checkbox" id="pOk" required> Autorizo a Sky Fit a entrar em contato comigo pelo WhatsApp</label>
       <button class="btn prim big" style="margin-top:8px">Quero minha aula experimental</button>
       <p class="erro" id="pErr"></p>
+      <p class="sm muted" style="text-align:center;margin-top:6px">Ao enviar, você autoriza a Sky Fit a falar com você pelo WhatsApp sobre a sua aula experimental. Seus dados não são compartilhados.</p>
     </form></div>`;
   ativarPills('#app');
   if(preview) $('#fpVoltar').onclick=()=>{ S.previewForm=false; render(); };
@@ -1300,6 +1317,8 @@ REGRAS:
 - O objetivo principal é levar o cliente a VISITAR a academia ou fazer aula experimental, depois fechar o plano mais adequado.
 - Trate a objeção real (preço, horário, tempo, distância, insegurança, "vou pensar") com empatia e argumento concreto. Sem pressão agressiva e sem mentir.
 - Se a conversa estiver vazia, sugira a primeira abordagem.
+- Às vezes a recepcionista não cola a conversa: ela marca as objeções e descreve com as palavras dela o que o cliente falou e qual a dificuldade. Baseie-se nesse RELATO.
+- Se vierem PRINTS do WhatsApp, leia as mensagens das imagens (balões à direita/verdes são da academia, à esquerda são do cliente) e analise a conversa toda.
 
 Responda APENAS com um JSON válido, sem texto fora dele, neste formato:
 {"temperatura":"quente|morno|frio","perfil":"1 frase sobre quem é o cliente e o que busca","objecao":"objeção real ou vazio","analise":"2-3 frases sobre o momento da venda e a estratégia","respostas":[{"titulo":"nome curto da abordagem","texto":"mensagem pronta"}],"proximoPasso":"ação concreta para a recepcionista"}
@@ -1314,7 +1333,7 @@ async function chamarAnthropic(system,conteudo,maxTokens){
   const k=await chaveIA(); if(!k) throw new Error('A chave da IA ainda não foi salva. O administrador cadastra em Ajustes → Agente de IA.');
   const modelo=['claude-sonnet-5-5','claude-haiku-5-5'].includes(S.cfg.iaModelo)?S.cfg.iaModelo:'claude-sonnet-5-5';
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:modelo,max_tokens:maxTokens,system,messages:[{role:'user',content:conteudo}]})});
+    body:JSON.stringify({model:modelo,max_tokens:maxTokens,system,messages:Array.isArray(conteudo)&&conteudo[0]&&conteudo[0].role?conteudo:[{role:'user',content:conteudo}]})});
   const data=await lerJSON(r);
   if(!r.ok){ if(r.status===401){ _chaveIA=null; throw new Error('Chave da IA inválida ou apagada. O administrador precisa salvar uma chave nova.'); }
     throw new Error('IA: '+(data.error?.message||r.status)); }
@@ -1335,44 +1354,146 @@ LEAD:
 - Observação: ${l.obs||'-'}
 - Histórico: ${(l.historico||[]).map(h=>h.acao).join(' > ')}
 - Recepcionista que vai enviar: ${S.perfil.nome}
-
+${l.iaModo==='rapido'?`
+RELATO DA RECEPCIONISTA (ela não colou a conversa):
+- Objeções marcadas: ${(l.iaObjs||[]).join(', ')||'-'}
+- O que o cliente falou / dificuldade dela: ${l.relato||'-'}
+`:''}
 CONVERSA DO WHATSAPP:
-${(l.conversa||'(ainda sem conversa)').slice(0,12000)}`;
-  const {texto}=await chamarAnthropic(IA_SISTEMA,contexto,1500);
+${l.imagens&&l.imagens.length?'(está nos prints anexados)':(l.conversa||'(não informada)').slice(0,12000)}`;
+  const conteudo=l.imagens&&l.imagens.length?[...l.imagens.map(d=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:d}})),{type:'text',text:contexto}]:contexto;
+  const {texto}=await chamarAnthropic(IA_SISTEMA,conteudo,1500);
   const js=texto.slice(texto.indexOf('{'),texto.lastIndexOf('}')+1);
   try{ return JSON.parse(js); }catch(e){ throw new Error('A IA respondeu num formato inesperado. Tente de novo.'); }
 }
 
 /* ======================= IA DE VENDAS ======================= */
+const IA_OBJ=['💰 Preço','⏰ Horário','🤔 Vou pensar','📍 Distância','😟 Insegurança / vergonha','👥 Vai falar com alguém','🏋️ Já treina em outra','🙈 Sumiu / não responde'];
+function reduzImagem(f,max=1600){ return new Promise((ok,erro)=>{ const fr=new FileReader(); fr.onerror=erro;
+  fr.onload=()=>{ const im=new Image(); im.onerror=erro; im.onload=()=>{ const k=Math.min(1,max/Math.max(im.width,im.height)), c=document.createElement('canvas');
+    c.width=Math.round(im.width*k); c.height=Math.round(im.height*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height); ok(c.toDataURL('image/jpeg',0.82).split(',')[1]); }; im.src=fr.result; };
+  fr.readAsDataURL(f); }); }
 function modalIA(l){
+  let modo=S.iaModo||'rapido', imgs=[];
   abrirModal(`<h2>🤖 Assistente de vendas — ${esc(l.nome)}</h2>
-    <label>Conversa do WhatsApp
-      <textarea id="iaConv" rows="8" placeholder="No WhatsApp: segure uma mensagem, selecione as outras, toque em copiar e cole aqui.">${esc(l.conversa||'')}</textarea></label>
+    <div class="seg seg3" id="iaModo"><button type="button" data-m="rapido">⚡ Rápido</button><button type="button" data-m="print">📸 Print</button><button type="button" data-m="colar">📋 Colar</button></div>
+    <div data-mp="rapido"><label>Qual a objeção? (pode marcar mais de uma)<div class="pills multi" data-campo="iaObj">${pills(IA_OBJ)}</div></label>
+      <label>O que o cliente falou e qual a sua dificuldade?<textarea id="iaRel" rows="4" placeholder="Pode ditar pelo microfone do teclado 🎤 Ex: ele achou caro o anual e disse que na outra academia é R$ 89">${esc(l.iaRelato||'')}</textarea></label></div>
+    <div data-mp="print"><input type="file" id="iaImg" accept="image/*" multiple style="display:none">
+      <button type="button" class="btn full" id="iaImgB">📸 Escolher print(s) da conversa</button><div class="iaThumbs" id="iaThumbs"></div>
+      <p class="sm muted" style="margin-bottom:10px">Tire print da conversa no WhatsApp (até 3) e escolha aqui. A IA lê as mensagens da imagem. O print não fica salvo.</p></div>
+    <div data-mp="colar"><label>Conversa do WhatsApp
+      <textarea id="iaConv" rows="8" placeholder="No WhatsApp: segure uma mensagem, selecione as outras, toque em copiar e cole aqui.">${esc(l.conversa||'')}</textarea></label></div>
     <button class="btn prim full" id="iaGo">✨ Analisar e sugerir respostas</button>
     <div id="iaRes">${l.ia?renderIA(l,l.ia):''}</div>`,()=>{
+    const mostra=()=>{ $('#iaModo').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===modo));
+      $('#sheet').querySelectorAll('[data-mp]').forEach(d=>d.classList.toggle('hidden',d.dataset.mp!==modo)); };
+    $('#iaModo').onclick=e=>{ const b=e.target.closest('[data-m]'); if(b){ modo=b.dataset.m; S.iaModo=modo; mostra(); } }; mostra();
+    $('#iaImgB').onclick=()=>$('#iaImg').click();
+    $('#iaImg').onchange=async e=>{ const fs=[...e.target.files].slice(0,3); imgs=[]; $('#iaThumbs').innerHTML='<span class="sm muted">Preparando...</span>';
+      for(const f of fs){ try{ imgs.push(await reduzImagem(f)); }catch(err){} }
+      $('#iaThumbs').innerHTML=imgs.map(d=>`<img src="data:image/jpeg;base64,${d}" alt="">`).join('')||'<p class="erro">Não consegui ler a imagem.</p>'; };
     $('#iaRes').onclick=e=>{ const b=e.target.closest('[data-copy]'); if(b) copiar($('#iaT'+b.dataset.copy).textContent); };
     $('#iaGo').onclick=async()=>{
-      const conversa=$('#iaConv').value.trim(), b=$('#iaGo');
-      b.disabled=true; $('#iaRes').innerHTML='<div class="carregando">🤖 Analisando o cliente e a conversa...</div>';
+      const b=$('#iaGo'), objs=pillsSel('iaObj').map(v=>v.replace(/^\S+\s/,'')), relato=$('#iaRel').value.trim(), conversa=$('#iaConv').value.trim();
+      if(modo==='rapido'&&!objs.length&&!relato) return toast('Marque a objeção ou escreva o que o cliente falou');
+      if(modo==='print'&&!imgs.length) return toast('Escolha pelo menos um print');
+      if(modo==='colar'&&!conversa) return toast('Cole a conversa');
+      b.disabled=true; $('#iaRes').innerHTML='<div class="carregando">🤖 Analisando o cliente...</div>';
       try{
-        const ref=db.collection('leads').doc(l.id);
-        const achou=!l.anuncio?detectarCodigo(conversa):null;
-        await ref.update(achou?{conversa,anuncio:achou.codigo,campanha:l.campanha||achou.c.nome}:{conversa});
-        if(achou) toast('Anúncio identificado: #'+achou.codigo);
+        const ref=db.collection('leads').doc(l.id), up={};
+        if(modo==='colar'){ up.conversa=conversa; const achou=!l.anuncio?detectarCodigo(conversa):null;
+          if(achou){ up.anuncio=achou.codigo; up.campanha=l.campanha||achou.c.nome; toast('Anúncio identificado: #'+achou.codigo); } }
+        if(modo==='rapido') up.iaRelato=relato;
+        if(Object.keys(up).length) await ref.update(up);
+        const dados={...l,...up,iaModo:modo,iaObjs:objs,relato,imagens:modo==='print'?imgs:[],conversa:modo==='colar'?conversa:(l.conversa||'')};
         let r;
-        if(DEMO){ await new Promise(ok=>setTimeout(ok,1200)); r=iaDemo({...l,conversa}); }
+        if(DEMO){ await new Promise(ok=>setTimeout(ok,1200)); r=iaDemo(dados); }
         else{
-          const url=urlFuncaoOk(S.cfg.iaUrl)?S.cfg.iaUrl:(IA_URL||'');
+          const url=modo==='colar'&&(urlFuncaoOk(S.cfg.iaUrl)?S.cfg.iaUrl:(IA_URL||''));
           if(url){ const token=await auth.currentUser.getIdToken();
             const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({leadId:l.id})});
             r=await lerJSON(resp); if(!resp.ok) throw new Error(r.erro||'Falha na IA'); }
-          else r=await iaDireta({...l,conversa});
+          else r=await iaDireta(dados);
         }
         r.em=Date.now(); r.por=S.perfil.nome;
-        await ref.update({ia:r, historico:FV.arrayUnion(hist('Consultou a IA de vendas'))});
+        await ref.update({ia:r, historico:FV.arrayUnion(hist('Consultou a IA de vendas ('+{rapido:'modo rápido',print:'print',colar:'conversa'}[modo]+')'))});
         $('#iaRes').innerHTML=renderIA(l,r);
       }catch(err){ $('#iaRes').innerHTML=`<p class="erro">${esc(err.message)}</p>`; }
       b.disabled=false; b.textContent='🔄 Analisar de novo';
+    };
+  });
+}
+
+/* ======================= COACH DE VENDAS ======================= */
+const COACH_SISTEMA=`Você é um coach de vendas de academia que treina as recepcionistas da Sky Fit (Rio Claro-SP) no atendimento por WhatsApp e no balcão.
+- Responda em português do Brasil, direto e prático, em no máximo 12 linhas. Use frases curtas e listas com "•" (sem markdown, sem asteriscos).
+- Quando ajudar, inclua 1 ou 2 mensagens prontas para WhatsApp entre aspas.
+- Preços, planos, horários e benefícios: use SOMENTE a BASE DA ACADEMIA. Nunca invente; se faltar, diga para confirmar com o administrador.
+- Foque em levar o cliente à visita/aula experimental e depois à matrícula, com empatia e sem pressão agressiva.`;
+function coachDemo(q){ return `(Exemplo de demonstração)\n• Primeiro, concorde e entenda: pergunte o que é mais importante pra pessoa.\n• Mostre o valor antes do preço: avaliação, treino montado, aulas coletivas inclusas.\n• Convide para conhecer: visita converte muito mais que mensagem.\n\nMensagem pronta:\n"Entendo total! Antes de decidir, que tal vir conhecer e fazer uma aula sem compromisso? Assim você compara com calma 😊 Qual horário fica bom pra você?"`; }
+function modalCoach(){
+  S.coach=S.coach||[];
+  const EX=['Cliente diz que a outra academia é mais barata','Mandei o preço e o cliente sumiu','Cliente tem vergonha de começar','Como convidar para a aula experimental?','Cliente pergunta se tem personal incluso','Como responder "vou pensar"?'];
+  const desenha=()=>{ $('#chMsgs').innerHTML=S.coach.map(m=>`<div class="chMsg ${m.role}">${esc(m.text).replace(/\n/g,'<br>')}</div>`).join('')
+      ||`<p class="sm muted">Pergunte qualquer coisa sobre atendimento e vendas. Toque num exemplo:</p><div class="pills">${EX.map(x=>`<button type="button" class="pill" data-ex="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
+    const c=$('#chMsgs'); c.scrollTop=c.scrollHeight; };
+  abrirModal(`<h2>🎓 Coach de vendas</h2><div id="chMsgs" class="chMsgs"></div>
+    <textarea id="chTxt" rows="3" style="width:100%" placeholder="Escreva ou dite pelo microfone do teclado 🎤"></textarea><p class="erro" id="chErr"></p>
+    <div class="row" style="margin-top:8px"><button class="btn ghost" id="chLimpa">Nova conversa</button><button class="btn prim" id="chGo" style="flex:1">Perguntar</button></div>`,()=>{
+    desenha();
+    $('#chMsgs').onclick=e=>{ const x=e.target.closest('[data-ex]'); if(x){ $('#chTxt').value=x.dataset.ex; $('#chTxt').focus(); } };
+    $('#chLimpa').onclick=()=>{ S.coach=[]; desenha(); };
+    $('#chGo').onclick=async()=>{
+      const q=$('#chTxt').value.trim(), b=$('#chGo'); if(!q) return; b.disabled=true; $('#chErr').textContent='';
+      S.coach.push({role:'user',text:q}); $('#chTxt').value=''; desenha(); $('#chMsgs').insertAdjacentHTML('beforeend','<div class="carregando">🎓 Pensando...</div>');
+      try{ let t;
+        if(DEMO){ await new Promise(ok=>setTimeout(ok,900)); t=coachDemo(q); }
+        else t=(await chamarAnthropic(COACH_SISTEMA+'\n\nBASE DA ACADEMIA:\n'+(S.cfg.baseIA||'(não preenchida)'),S.coach.slice(-10).map(m=>({role:m.role,content:m.text})),900)).texto;
+        S.coach.push({role:'assistant',text:t.trim()});
+      }catch(err){ S.coach.pop(); $('#chTxt').value=q; $('#chErr').textContent=err.message; }
+      b.disabled=false; desenha();
+    };
+  });
+}
+
+/* ======================= ATENDIMENTOS (início / fim) ======================= */
+const ATEND_MAX=60; // minutos: depois disso o atendimento esquecido aberto é encerrado sozinho
+const sessaoAtiva=l=>{ const a=l&&l.emAtendimento; return a&&a.ini&&(Date.now()-a.ini)<ATEND_MAX*60000?a:null; };
+function sessoesDe(l){
+  const L=[...(l.atendimentos||[])], a=l.emAtendimento;
+  if(a&&a.ini&&!sessaoAtiva(l)) L.push({...a,fim:a.ini+ATEND_MAX*60000,dur:0,auto:true,res:'Esquecido aberto (não conta tempo)'});
+  return L;
+}
+const fechaSessao=(a,res,auto)=>{ const fim=auto?a.ini+ATEND_MAX*60000:Date.now(); return {uid:a.uid,nome:a.nome,ini:a.ini,fim,dur:auto?0:Math.max(1,Math.round((fim-a.ini)/60000)),res:auto?'Esquecido aberto (não conta tempo)':(res||''),...(auto?{auto:true}:{})}; };
+// fecha o meu atendimento aberto quando eu registro agendou / matriculou / perdido direto pelo botão
+function fechaMinha(l,res){ const a=sessaoAtiva(l); if(!a||a.uid!==S.perfil.uid) return {};
+  return {emAtendimento:FV.delete(),atendimentos:FV.arrayUnion(fechaSessao(a,res,false))}; }
+async function iniciarAtend(l,ref){
+  const a=l.emAtendimento, ativa=!!sessaoAtiva(l), hs=[];
+  const up={emAtendimento:{uid:S.perfil.uid,nome:S.perfil.nome,ini:Date.now()}};
+  if(a&&a.ini){ up.atendimentos=FV.arrayUnion(fechaSessao(a,ativa?'Assumido por '+S.perfil.nome:'Encerrado automaticamente',!ativa));
+    if(ativa&&a.uid!==S.perfil.uid) hs.push(hist('Assumiu o atendimento que estava com '+a.nome)); }
+  if(!l.respondidoEm&&ehLead(l)){ Object.assign(up,{respondidoEm:TS.now(),atendidoPor:eu(),...(l.dono?{}:{dono:eu()})});
+    if(l.status==='novo'){ up.status='respondido'; up.etapaMax=Math.max(l.etapaMax||0,1); hs.push(hist('Respondeu o lead')); } }
+  hs.push(hist('▶ Iniciou atendimento'));
+  up.historico=FV.arrayUnion(...hs);
+  await ref.update(up); toast('▶ Atendimento iniciado. Todas veem que você está com esse cliente');
+}
+function modalFimAtend(l,ref){
+  const a=l.emAtendimento; if(!a) return;
+  const min=Math.max(1,Math.round((Date.now()-a.ini)/60000));
+  const OPC=[['agendar','🗓 Agendou visita'],['matricular','🏆 Matriculou'],['followup','📅 Retornar depois'],['aguardando','⏳ Aguardando o cliente responder'],['nada','💬 Só conversamos'],['perdido','❌ Perdido']];
+  abrirModal(`<h2>⏹ Finalizar atendimento — ${esc(l.nome)}</h2>
+    <p class="sm muted" style="margin-bottom:10px">Começou às ${hora(new Date(a.ini))} · ${fmtMin(min)} de atendimento</p>
+    <label>Como terminou?<div class="pills" data-campo="fimRes">${OPC.map(([k,t])=>`<button type="button" class="pill" data-v="${k}">${t}</button>`).join('')}</div></label>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" data-fechar>Cancelar</button><button class="btn prim" id="faOk" style="flex:1">Finalizar</button></div>`,()=>{
+    $('#faOk').onclick=async()=>{
+      const k=pillSel('fimRes'); if(!k) return toast('Escolha como terminou');
+      const rot=OPC.find(x=>x[0]===k)[1].replace(/^\S+\s/,''), z=fechaSessao(a,rot,false);
+      await ref.update({emAtendimento:FV.delete(),atendimentos:FV.arrayUnion(z),historico:FV.arrayUnion(hist(`⏹ Finalizou atendimento (${fmtMin(z.dur)}) · ${rot}`))});
+      fecharModal(); toast('Atendimento finalizado ✅');
+      if(['agendar','matricular','followup','perdido'].includes(k)) setTimeout(()=>{ S.pulaConf=true; acao(l.id,k); },200);
     };
   });
 }
@@ -1396,7 +1517,7 @@ async function copiar(t){
   toast('Copiado! É só colar no WhatsApp 📋');
 }
 function iaDemo(l){
-  const n=(l.nome||'').split(' ')[0], txt=(l.conversa||'').toLowerCase();
+  const n=(l.nome||'').split(' ')[0], txt=((l.conversa||'')+' '+(l.relato||'')+' '+(l.iaObjs||[]).join(' ')).toLowerCase();
   const preco=/caro|preço|valor|quanto/.test(txt)||l.objecao==='Preço', pensar=/pensar|depois|vejo/.test(txt);
   return {demo:true, temperatura:preco||pensar?'morno':'quente',
     perfil:`Interessado(a) em ${(l.interesse||'treinar').toLowerCase()}, veio pelo ${l.origem||'anúncio'}.`,
@@ -1512,7 +1633,7 @@ function vAuditoria(){
 /* ======================= COMISSÕES ======================= */
 function cfgCom(){ const c=S.cfg;
   const porPlano={}; String(c.comPorPlano||'').split('\n').forEach(x=>{ const i=x.indexOf('='); if(i>0){ const n=x.slice(0,i).trim(), v=num(x.slice(i+1)); if(n) porPlano[semAcento(n)]=v; } });
-  return {tipo:c.comTipo||'fixo',valor:+(c.comValor??c.comissao)||0,pct:+c.comPct||0,porPlano,split:Math.min(100,Math.max(0,+c.comSplit||0)),bonus:+c.comBonus||0,carencia:+c.comCarencia||0}; }
+  return {tipo:c.comTipo||'fixo',valor:+(c.comValor??c.comissao)||0,pct:+c.comPct||0,porPlano,split:Math.min(100,Math.max(0,+c.comSplit||0)),splitAg:Math.min(100,Math.max(0,c.comSplitAg!=null&&c.comSplitAg!==''?+c.comSplitAg:(+c.comSplit||0))),bonus:+c.comBonus||0,carencia:+c.comCarencia||0}; }
 const comAtiva = () => { const k=cfgCom(); if(S.cfg.comAtivo!==true) return false; return k.tipo==='fixo'?(k.valor>0||Object.keys(k.porPlano).length>0):(k.pct>0||Object.keys(k.porPlano).length>0); };
 function comissaoDe(l){
   if(!l.matriculadoEm||!comAtiva()) return null;
@@ -1523,8 +1644,10 @@ function comissaoDe(l){
   const dias=diasDesde(l.matriculadoEm);
   const anulada=!!l.cancelouEm && (!k.carencia || (toD(l.cancelouEm)-toD(l.matriculadoEm))/86400000 < k.carencia);
   const liberada=!anulada && dias>=k.carencia;
+  const agendou=at.uid!==fech.uid&&(l.historico||[]).some(h=>/^Agendou visita/.test(h.acao||'')&&(h.uid?h.uid===at.uid:h.por===at.nome));
+  const sp=agendou?k.splitAg:k.split;
   const partes=at.uid===fech.uid ? [{uid:fech.uid,nome:fech.nome,papel:'atendeu e fechou',valor:base}]
-    : [{uid:at.uid,nome:at.nome,papel:'atendeu',valor:base*k.split/100},{uid:fech.uid,nome:fech.nome,papel:'fechou',valor:base*(100-k.split)/100}].filter(p=>p.valor>0);
+    : [{uid:at.uid,nome:at.nome,papel:'atendeu',valor:base*sp/100},{uid:fech.uid,nome:fech.nome,papel:'fechou',valor:base*(100-sp)/100}].filter(p=>p.valor>0);
   return {base,partes,liberada,anulada,liberaEm:new Date(toD(l.matriculadoEm).getTime()+k.carencia*86400000)};
 }
 function fechamento(ano,mes){
@@ -1760,7 +1883,7 @@ function equipeRecepcao(){
 }
 function desempenho(ini,fim){
   const P=pesos(), t0=ini.getTime(), t1=fim.getTime(), E=equipeRecepcao();
-  const R={}; E.forEach(u=>R[u.uid]={uid:u.uid,nome:u.nome,cad:0,atend:0,rap:0,msgs:0,vis:0,veio:0,matr:0,renov:0,check:0,voltou:0,tempos:[],pontos:0});
+  const R={}; E.forEach(u=>R[u.uid]={uid:u.uid,nome:u.nome,cad:0,atend:0,rap:0,msgs:0,vis:0,veio:0,matr:0,renov:0,check:0,voltou:0,tempos:[],pontos:0,sess:0,sessMin:0,contin:0,_lm:new Set()});
   const quem=(h)=>{ if(h.uid&&R[h.uid]) return R[h.uid]; const u=E.find(x=>x.nome===h.por); return u?R[u.uid]:null; };
   const dentro=t=>{ const v=t?(t.toDate?t.toDate().getTime():+t):0; return v>=t0&&v<t1; };
   S.leads.forEach(l=>{
@@ -1768,6 +1891,8 @@ function desempenho(ini,fim){
     if(l.atendidoPor&&R[l.atendidoPor.uid]&&ehLead(l)&&l.respondidoEm&&dentro(l.respondidoEm)){ const x=R[l.atendidoPor.uid], m=minEntre(toD(l.chegadaEm),toD(l.respondidoEm));
       x.atend++; if(m>=0){ x.tempos.push(m); if(m<=(+S.cfg.alertaMin||15)) x.rap++; } }
     const f=l.fechadoPor||l.atendidoPor; if(f&&R[f.uid]&&l.matriculadoEm&&dentro(l.matriculadoEm)){ if(ehLead(l)) R[f.uid].matr++; else R[f.uid].renov++; }
+    sessoesDe(l).forEach(z=>{ const x=R[z.uid]; if(!x||!(z.ini>=t0&&z.ini<t1)) return; x.sess++; x.sessMin+=z.dur||0; if(!z.auto) x.sessT=(x.sessT||0)+1;
+      const d=donoDe(l); if(d&&d.uid!==z.uid) x.contin++; if(l.status==='matriculado') x._lm.add(l.id); });
     const porDia={};
     (l.historico||[]).forEach(h=>{ if(!(h.em>=t0&&h.em<t1)) return; const x=quem(h); if(!x) return; const a=h.acao||'';
       if(/^Agendou visita/.test(a)) x.vis++;
@@ -1778,7 +1903,7 @@ function desempenho(ini,fim){
     });
   });
   (S.exalunos||[]).forEach(e=>(e.contatos||[]).forEach(c=>{ if(c.em>=t0&&c.em<t1){ const u=E.find(x=>x.nome===c.por); if(u) R[u.uid].msgs++; } }));
-  Object.values(R).forEach(x=>{ x.tMed=avg(x.tempos);
+  Object.values(R).forEach(x=>{ x.tMed=avg(x.tempos); x.sessMatr=x._lm.size;
     x.pontos=Math.round((x.cad*P.cadastro+x.rap*P.resp15+(x.atend-x.rap)*P.resp+x.msgs*P.msg+x.vis*P.visita+x.veio*P.veio+x.matr*P.matr+x.renov*P.renov+x.check*P.checkin+x.voltou*P.voltou)*10)/10; });
   const lista=Object.values(R).sort((a,b)=>b.pontos-a.pontos); lista.forEach((x,i)=>x.pos=i+1);
   return lista;
@@ -1797,10 +1922,11 @@ function vDesempenho(){
       <div class="bt" style="margin-top:6px"><div style="width:${Math.min(100,matrMes/metaEq*100)}%;background:${matrMes>=metaEq?'var(--grn)':'var(--acc)'}"></div></div>
       ${matrMes>=metaEq?`<p class="sm okTxt" style="margin-top:6px">🎉 Meta da equipe batida!</p>${adm?'<button class="btn sm prim" id="dsBonEq" style="margin-top:6px">🎁 Bonificar a equipe</button>':''}`:''}</div>`:'';
   const num=(v,l)=>`<div class="dNum"><b>${v}</b><span>${l}</span></div>`;
-  const cartao=x=>`<div class="dCard"><div class="dNums">${num(x.cad,'cadastrou')}${num(x.atend,'atendeu')}${num(x.msgs,'mensagens')}${num(x.vis,'agendou visita')}${num(x.veio,'vieram')}${num(x.matr,'matriculou')}${x.renov?num(x.renov,'renovações'):''}${x.check?num(x.check,'check-ins'):''}${x.voltou?num(x.voltou,'ex-alunos voltaram'):''}</div>
-    <div class="sm muted" style="margin-top:6px">Tempo médio de resposta: <b>${fmtMin(x.tMed)}</b> · ${x.rap} respondidos em até ${+S.cfg.alertaMin||15} min</div></div>`;
+  const cartao=x=>`<div class="dCard"><div class="dNums">${num(x.sess,'atendimentos')}${num(x.cad,'cadastrou')}${num(x.atend,'1º contato')}${num(x.msgs,'mensagens')}${num(x.vis,'agendou visita')}${num(x.veio,'vieram')}${num(x.matr,'matriculou')}${x.renov?num(x.renov,'renovações'):''}${x.check?num(x.check,'check-ins'):''}${x.voltou?num(x.voltou,'ex-alunos voltaram'):''}</div>
+    <div class="sm muted" style="margin-top:6px">Tempo médio de resposta: <b>${fmtMin(x.tMed)}</b> · ${x.rap} respondidos em até ${+S.cfg.alertaMin||15} min</div>
+    ${x.sess?`<div class="sm muted">⏱ Tempo em atendimento: <b>${fmtMin(x.sessMin)}</b> · média <b>${fmtMin(x.sessT?x.sessMin/x.sessT:0)}</b> por atendimento${x.contin?` · ${x.contin} continuado(s) de colegas`:''}${x.sessMatr?` · ${x.sessMatr} cliente(s) atendido(s) que matricularam`:''}</div>`:''}</div>`;
   if(!adm){
-    const eu_=D.find(x=>x.uid===S.perfil.uid)||{pos:'-',pontos:0,cad:0,atend:0,rap:0,msgs:0,vis:0,veio:0,matr:0,renov:0,check:0,voltou:0};
+    const eu_=D.find(x=>x.uid===S.perfil.uid)||{pos:'-',pontos:0,cad:0,atend:0,rap:0,msgs:0,vis:0,veio:0,matr:0,renov:0,check:0,voltou:0,sess:0,sessMin:0,contin:0,sessMatr:0};
     const nota=notaDe(S.perfil.uid,mesChave(new Date())), notaAnt=notaDe(S.perfil.uid,mesChave(new Date(hj.getFullYear(),hj.getMonth()-1,1)));
     const bon=bonusDe(S.perfil.uid,mes);
     const frase=eu_.pos===1&&eu_.pontos>0?'🥇 Você está em 1º lugar! Continue assim!':eu_.pontos>0?`Você está em ${eu_.pos}º lugar. Cada atendimento rápido e cada visita agendada somam pontos 💪`:'Comece agora: responda rápido e agende visitas para somar pontos 💪';
@@ -1816,8 +1942,8 @@ function vDesempenho(){
     const max=Math.max(1,...D.map(x=>x.pontos));
     $('#main').innerHTML=`${chips}${caixaEquipe}
       <div class="box"><h3>🏆 Ranking ${tit}</h3>${D.map(x=>`<div class="dRk"><span>${['🥇','🥈','🥉'][x.pos-1]||x.pos+'º'} <b>${esc(x.nome)}</b></span><div class="bt"><div style="width:${x.pontos/max*100}%"></div></div><b>${dec(x.pontos,1)}</b></div>`).join('')||'<p class="muted sm">Cadastre recepcionistas em Equipe.</p>'}</div>
-      <div class="box"><h3>Números ${tit}</h3><div class="tabw"><table class="tmk"><tr><th>Recepcionista</th><th class="n">Pontos</th><th class="n">Cadastrou</th><th class="n">Atendeu</th><th class="n">Resp. rápida</th><th class="n">Tempo médio</th><th class="n">Mensagens</th><th class="n">Visitas</th><th class="n">Vieram</th><th class="n">Matrículas</th><th class="n">Renov.</th><th class="n">Nota do mês</th></tr>
-        ${D.map(x=>{ const n=notaDe(x.uid,mes); return `<tr><td><b>${esc(x.nome)}</b></td><td class="n"><b>${dec(x.pontos,1)}</b></td><td class="n">${x.cad}</td><td class="n">${x.atend}</td><td class="n">${x.rap}</td><td class="n">${fmtMin(x.tMed)}</td><td class="n">${x.msgs}</td><td class="n">${x.vis}</td><td class="n">${x.veio}</td><td class="n">${x.matr}</td><td class="n">${x.renov}</td><td class="n">${n?dec(n.media,1)+' ★':'—'}</td></tr>`; }).join('')}</table></div></div>
+      <div class="box"><h3>Números ${tit}</h3><div class="tabw"><table class="tmk"><tr><th>Recepcionista</th><th class="n">Pontos</th><th class="n">Atendimentos</th><th class="n">Tempo atend.</th><th class="n">Continuou de colegas</th><th class="n">Cadastrou</th><th class="n">1º contato</th><th class="n">Resp. rápida</th><th class="n">Tempo médio</th><th class="n">Mensagens</th><th class="n">Visitas</th><th class="n">Vieram</th><th class="n">Matrículas</th><th class="n">Renov.</th><th class="n">Nota do mês</th></tr>
+        ${D.map(x=>{ const n=notaDe(x.uid,mes); return `<tr><td><b>${esc(x.nome)}</b></td><td class="n"><b>${dec(x.pontos,1)}</b></td><td class="n">${x.sess}</td><td class="n">${x.sess?fmtMin(x.sessMin):'—'}</td><td class="n">${x.contin}</td><td class="n">${x.cad}</td><td class="n">${x.atend}</td><td class="n">${x.rap}</td><td class="n">${fmtMin(x.tMed)}</td><td class="n">${x.msgs}</td><td class="n">${x.vis}</td><td class="n">${x.veio}</td><td class="n">${x.matr}</td><td class="n">${x.renov}</td><td class="n">${n?dec(n.media,1)+' ★':'—'}</td></tr>`; }).join('')}</table></div></div>
       <div class="box"><h3>⭐ Nota de empenho e 🎁 bonificação (${new Date(mes+'-01T12:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})})</h3>
         ${D.map(x=>{ const n=notaDe(x.uid,mes), b=bonusDe(x.uid,mes); return `<div class="dAdm"><div><b>${esc(x.nome)}</b><div class="sm muted">${n?`<span class="estr">${estrelas(n.media)}</span> ${dec(n.media,1)}${n.comentario?' · “'+esc(n.comentario)+'”':''}`:'Sem nota ainda'}${b.length?` · bonificações: <b class="okTxt">${moeda(b.reduce((s,y)=>s+(+y.valor||0),0))}</b>`:''}</div></div>
           <div class="row" style="gap:6px"><button class="btn sm" data-dnota="${x.uid}">⭐ ${n?'Editar nota':'Dar nota'}</button><button class="btn sm" data-dbon="${x.uid}">🎁 Bonificar</button></div></div>`; }).join('')}
@@ -2685,7 +2811,7 @@ function vEquipe(){
 
 
 /* ======================= DESENVOLVEDOR ======================= */
-const VERSAO='2026.10.21';
+const VERSAO='2026.10.21b';
 const DEVS=(DEMO?['dev@leads.skyfit.app']:(CFG.devs||CFG.admins||[])).map(e=>String(e).toLowerCase());
 const ehDev=()=>!!S.perfil?.dev;
 const MODULOS=[['ia','🤖 IA de vendas'],['marketing','📣 Marketing / área da agência'],['comissoes','💵 Comissões'],['desempenho','🏆 Desempenho'],['reconquista','♻️ Reconquista de ex-alunos'],['tv','📺 Modo TV'],['auditoria','🔎 Auditoria']];
@@ -2798,10 +2924,11 @@ function vConfig(){
       <label>Valor padrão (R$ por matrícula, se fixo)<input type="number" id="cmVal" min="0" step="0.01" value="${c.comValor??c.comissao??0}"></label>
       <label>Percentual padrão (%, se percentual)<input type="number" id="cmPct" min="0" step="0.1" value="${c.comPct??10}"></label>
       <label>Valor diferente por plano (um por linha: Plano = valor)<textarea id="cmPlano" rows="3" placeholder="Anual (12x) = 30&#10;Mensal = 15">${esc(c.comPorPlano||'')}</textarea></label>
-      <label>Quando uma atende e outra fecha: % para quem ATENDEU<input type="number" id="cmSplit" min="0" max="100" step="5" value="${c.comSplit||0}"></label>
+      <label>Quando uma atende e outra fecha: % para quem ATENDEU<input type="number" id="cmSplit" min="0" max="100" step="5" value="${c.comSplit??30}"></label>
+      <label>…e se quem atendeu já tinha AGENDADO a visita: % para quem atendeu<input type="number" id="cmSplitAg" min="0" max="100" step="5" value="${c.comSplitAg??50}"></label>
       <label>Bônus por bater a meta do mês (R$)<input type="number" id="cmBonus" min="0" step="0.01" value="${c.comBonus||0}"></label>
       <label>Carência: comissão libera após quantos dias da matrícula<input type="number" id="cmCar" min="0" step="1" value="${c.comCarencia||0}"></label>
-      <p class="sm muted">Ex: split 30 → quem atendeu ganha 30% e quem fechou 70%. Se a mesma pessoa atende e fecha, fica com 100%. Se o aluno cancelar dentro da carência, a comissão é anulada.</p>
+      <p class="sm muted">Sugestão: 30 / 50. Quem só iniciou a conversa ganha 30% e quem fechou 70%; se quem iniciou já deixou a visita agendada, fica meio a meio. Se a mesma pessoa atende e fecha, fica com 100%. Se o aluno cancelar dentro da carência, a comissão é anulada.</p>
     </div>
     <h3 style="margin-top:22px">💬 Respostas rápidas (uma por linha: Título = mensagem)</h3>
     <textarea id="cRR" rows="10" class="busca">${esc((c.respostas||[]).map(r=>r.titulo+' = '+r.texto).join('\n'))}</textarea>
@@ -2853,7 +2980,7 @@ function vConfig(){
 
       msgLembreteDia:$('#cLD').value,msgLembreteHora:$('#cLH').value,cadencia:porDia('#cCad'),checkins:porDia('#cCk'),
       msgRepescagem:$('#cRep').value,diasRepescagem:parseInt($('#cRepD').value)||30,comAtivo:$('#cmAtivo').checked,comRenovacao:$('#cmRen').checked,comTipo:$('#cmTipo').value,comValor:parseFloat($('#cmVal').value)||0,comPct:parseFloat($('#cmPct').value)||0,comPorPlano:$('#cmPlano').value,
-      comSplit:Math.min(100,Math.max(0,parseFloat($('#cmSplit').value)||0)),comBonus:parseFloat($('#cmBonus').value)||0,comCarencia:parseInt($('#cmCar').value)||0,
+      comSplit:Math.min(100,Math.max(0,parseFloat($('#cmSplit').value)||0)),comSplitAg:Math.min(100,Math.max(0,parseFloat($('#cmSplitAg').value)||0)),comBonus:parseFloat($('#cmBonus').value)||0,comCarencia:parseInt($('#cmCar').value)||0,
       respostas:lista('#cRR').map(x=>{ const i=x.indexOf('='); return i>0?{titulo:x.slice(0,i).trim(),texto:x.slice(i+1).trim()}:null; }).filter(r=>r&&r.titulo&&r.texto),
       msgReconquista:$('#cRec').value,diasReconquista:parseInt($('#cRecD').value)||30,motivosCancel:lista('#cMC'),ltvMeses:parseInt($('#cLtv').value)||6,
       motivosDesq:lista('#cDsq'),metaCPC:parseFloat($('#cMCpc').value)||0,metaCPL:parseFloat($('#cMCpl').value)||0,metaCAC:parseFloat($('#cMCac').value)||0,
