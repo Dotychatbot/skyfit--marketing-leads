@@ -242,6 +242,7 @@ body.lpBody{background:#071a33}
 .lpGlow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(239,51,64,.45),transparent 65%);top:-160px;right:-200px;filter:blur(10px);animation:lpFlut 9s ease-in-out infinite}
 .lpHeroIn{position:relative;max-width:520px;animation:lpUp .9s ease both}
 .lpLogo{width:120px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.4));margin-bottom:14px;animation:lpUp .8s ease both}
+.lpConvite{background:#fff;color:#0a2a55;display:inline-block;padding:10px 16px;border-radius:14px;font-size:14px;font-weight:600;margin-bottom:12px;box-shadow:0 10px 26px rgba(0,0,0,.3);animation:lpPop .6s .3s cubic-bezier(.2,1.6,.4,1) both}
 .lpBadge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);padding:8px 14px;border-radius:999px;font-weight:800;font-size:12px;letter-spacing:.08em;margin-bottom:16px}
 .lpHero h1{font-size:clamp(28px,8vw,44px);line-height:1.08;font-weight:900;margin:0 0 14px;letter-spacing:-.01em}
 .lpHero h1 span{background:linear-gradient(90deg,#ff5a66,#EF3340,#ffb3b9,#EF3340);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lpBrilho 5s linear infinite}
@@ -417,6 +418,10 @@ function criarDemo(){
       if(L.status==='respondido'&&!window._atDemo){ window._atDemo=1; L.emAtendimento={uid:por.uid,nome:por.nome,ini:agora-6*MIN}; } }
     store.leads[novoId()]=L;
   });
+  // leads que vieram por links de convite
+  { const ls=Object.values(store.leads).filter(l=>l.canal==='recepcao'&&!l.indicadoPor);
+    ls.slice(0,5).forEach(l=>{ l.divulgadoPor={tipo:'rec',uid:l.registradoPor.uid,nome:l.registradoPor.nome}; l.origem='Link da recepção'; l.viaForm=true; });
+    ls.slice(5,9).forEach((l,i)=>{ const p=i%2?{cod:'marina',nome:'Prof. Marina'}:{cod:'joao',nome:'Prof. João'}; l.divulgadoPor={tipo:'prof',...p}; l.origem='Indicação de professor'; l.indicadoPor=p.nome; l.viaForm=true; }); }
   // perdidos antigos para a repescagem
   ['Ricardo Nogueira','Sabrina Alves','Otávio Rocha'].forEach((nome,i)=>{ const c=agora-(35+i*8)*DIA, rec=recs[i];
     store.leads[novoId()]={nome,whatsapp:'(19) 99'+(7000000+i*1234567),origem:'Instagram',interesse:'Musculação',campanha:'',obs:'',status:'perdido',etapaMax:1,
@@ -429,13 +434,13 @@ function criarDemo(){
       store.notas[ma+'_'+uid]={uid,nome,mes:ma,crit:{atendimento:Math.round(m),proatividade:Math.round(m),organizacao:Math.round(m)},media:m,comentario:com,por:'Administrador',em:agora-10*DIA}; });
     store.bonus['bn1']={uid:'r2',nome:'Bruna',mes:mk,valor:50,motivo:'Melhor tempo de resposta',por:'Administrador',em:agora-DIA};
     Object.values(store.leads).filter(l=>l.atendidoPor&&l.respondidoEm).slice(0,25).forEach((l,i)=>{ const t=agora-(i%6)*3600000-i*60000; l.historico.push({acao:'Abriu o WhatsApp do cliente',por:l.atendidoPor.nome,uid:l.atendidoPor.uid,em:t}); }); }
-  store.config.geral={metas:{r1:8,r2:8,r3:6,r4:6},metaEquipe:20,comAtivo:true,comTipo:'fixo',comValor:20,comPorPlano:'Anual (12x) = 30',comSplit:30,comSplitAg:50,comBonus:100,comCarencia:7,metaCPC:9,metaCPL:15,metaCAC:70,ultimoBackup:agora-40*DIA};
+  store.config.geral={metas:{r1:8,r2:8,r3:6,r4:6},metaEquipe:20,comAtivo:true,comTipo:'fixo',comValor:20,comPorPlano:'Anual (12x) = 30',comSplit:30,comSplitAg:50,divulgadores:[{cod:'joao',nome:'Prof. João'},{cod:'marina',nome:'Prof. Marina'}],bonusProf:20,comBonus:100,comCarencia:7,metaCPC:9,metaCPL:15,metaCAC:70,ultimoBackup:agora-40*DIA};
   [['Roberta Campos','(19) 99711-2233',62],['Felipe Arantes','(19) 99822-3344',95],['Sônia Prado','(19) 99633-4455',40],['Wagner Luz','(19) 99544-5566',130]]
     .forEach(([nome,w,d])=>store.exalunos[novoId()]={nome,whatsapp:w,saida:isoDia(new Date(agora-d*DIA)),status:'aguardando',criadoEm:agora-5*DIA,por:'Administrador',contatos:[]});
   store.lixeira['lx1']={nome:'Teste Recepção',whatsapp:'(19) 90000-0000',origem:'Outro',interesse:'Musculação',status:'novo',etapaMax:0,chegadaEm:new Stamp(agora-3*DIA),historico:[{acao:'Lead registrado',por:'Carla',em:agora-3*DIA}],
     _motivo:'Cadastro de teste',_excluidoPor:{uid:'adm',nome:'Administrador'},_excluidoEm:agora-2*DIA};
   { const mat=Object.values(store.leads).filter(l=>l.status==='matriculado'); if(mat[0]){ mat[0].cancelouEm=new Stamp(agora-3*DIA); mat[0].motivoCancel='Financeiro'; } }
-  store.config.publico={logins:DEMO_USERS.filter(u=>u.papel!=='admin').map(u=>({nome:u.nome,usuario:u.email.split('@')[0],papel:u.papel,uid:u.uid}))};
+  store.config.publico={logins:DEMO_USERS.filter(u=>u.papel!=='admin').map(u=>({nome:u.nome,usuario:u.email.split('@')[0],papel:u.papel,uid:u.uid})),divulgadores:[{cod:'joao',nome:'Prof. João'},{cod:'marina',nome:'Prof. Marina'}]};
   // campanhas e resultados lançados pela agência
   const cp1=novoId(), cp2=novoId();
   store.campanhas[cp1]={nome:'Promo Outubro',plataforma:'Instagram + Facebook',status:'Ativa',objetivo:'Conversas iniciadas no WhatsApp',
@@ -919,12 +924,13 @@ function vLeads(){
   $('#main').innerHTML=`${meta?`<div class="meta"><div class="row sm"><b>🎯 Sua meta do mês</b><span><b>${feitas}</b> de ${meta} matrículas</span></div>
       <div class="bt"><div style="width:${Math.min(100,feitas/meta*100)}%"></div></div>
       ${comAtiva()?(()=>{ const c=minhaComissaoMes(); return `<div class="sm muted">Sua comissão no mês: <b>${moeda(c.total)}</b>${c.aLiberar?` · ${moeda(c.aLiberar)} aguardando carência`:''}${c.bonus?' · inclui bônus da meta 🎉':''}</div>`; })():''}</div>`:''}
-    ${mod('ia')?'<div class="row" style="justify-content:flex-end;margin-bottom:8px"><button class="btn sm ia" id="coachB">🎓 Coach de vendas</button></div>':''}
+    <div class="row" style="justify-content:flex-end;gap:6px;margin-bottom:8px">${S.perfil.papel==='recepcao'?'<button class="btn sm" id="meuLinkB">📲 Meu link de convite</button>':''}${mod('ia')?'<button class="btn sm ia" id="coachB">🎓 Coach de vendas</button>':''}</div>
     <div class="chips" id="chips"></div>
     <input class="busca" id="busca" placeholder="🔍 Buscar por nome ou telefone" value="${esc(S.busca)}">
     <div id="lista"></div>`;
   $('#busca').oninput=e=>{ S.busca=e.target.value; renderLista(); };
   if($('#coachB')) $('#coachB').onclick=modalCoach;
+  if($('#meuLinkB')) $('#meuLinkB').onclick=()=>modalLinkConvite(S.perfil.nome,linkConvite('rec',mostraLogin(S.perfil.email||'')),true);
   $('#chips').onclick=e=>{ const c=e.target.closest('[data-f]'); if(c){ S.filtro=c.dataset.f; renderLista(); } };
   $('#lista').onclick=e=>{
     const b=e.target.closest('[data-a]'); if(!b) return;
@@ -964,7 +970,7 @@ function card(l){
     <div class="row"><div><div class="nome">${esc(l.nome)}</div>
       <div class="muted sm">${esc(l.interesse||'—')} · ${esc(l.origem||'—')}${l.campanha?' · '+esc(l.campanha):''}${l.anuncio?` <span class="cod">#${esc(l.anuncio)}</span>`:''}${l.bairro?' · 📍 '+esc(l.bairro):''}</div></div>
       <span class="st">${!ehLead(l)?'🔁 '+esc(l.renTipo||'Renovação'):canalDe(l)==='marketing'?'📣 ':'🏠 '}${l.viaForm?'📝 ':''}${!ehLead(l)?'':desq(l)?'Desqualificado':ROTULO[l.status]}${qualif(l)&&!fechado(l)?' ⭐':''}</span></div>
-    ${l.indicadoPor?`<div class="sm">🤝 Indicado por <b>${esc(l.indicadoPor)}</b></div>`:''}
+    ${l.divulgadoPor?`<div class="sm">${l.divulgadoPor.tipo==='rec'?'📲 Veio pelo link da':'🎓 Indicação do professor'} <b>${esc(l.divulgadoPor.nome)}</b></div>`:l.indicadoPor?`<div class="sm">🤝 Indicado por <b>${esc(l.indicadoPor)}</b></div>`:''}
     <div class="row sm"><span>Chegou ${dataBR(ch)} às ${hora(ch)}</span>${tempo}</div>
     ${donoDe(l)?`<div class="sm muted"><span class="dono ${ehMeu(l)?'meu':''}">👤 ${ehMeu(l)?'Seu lead':'Lead da '+esc(donoDe(l).nome)}</span>${l.atendidoPor&&l.atendidoPor.uid!==donoDe(l).uid?` · atendeu: <b>${esc(l.atendidoPor.nome)}</b>`:''}${l.fechadoPor?` · fechou: <b>${esc(l.fechadoPor.nome)}</b>`:''}</div>`:''}
     ${(()=>{ const a=sessaoAtiva(l); return a?`<div class="atendOn ${a.uid===S.perfil.uid?'meu':''}">🟢 Em atendimento com <b>${a.uid===S.perfil.uid?'você':esc(a.nome)}</b> desde ${hora(new Date(a.ini))}</div>`:''; })()}
@@ -1003,10 +1009,10 @@ async function acao(id,a){
   S.pulaConf=false;
   const ref=db.collection('leads').doc(id);
   const avanca=(st,extra={},txt)=>ref.update({status:st, etapaMax:Math.max(l.etapaMax||0,ETAPAS.indexOf(st)), ...(['agendado','matriculado'].includes(st)?fechaMinha(S.leads.find(x=>x.id===id)||l,ROTULO[st]):{}), ...extra, historico:FV.arrayUnion(hist(txt||ROTULO[st]))});
-  const garanteResp = () => l.respondidoEm ? {} : {respondidoEm:TS.now(), atendidoPor:eu(), ...(l.dono?{}:{dono:eu()})};
+  const garanteResp = () => l.respondidoEm ? {} : {respondidoEm:TS.now(), atendidoPor:eu(), ...(l.dono?{}:{dono:donoInicial(l)})};
   try{
     switch(a){
-      case 'respondi': await avanca('respondido',{respondidoEm:TS.now(),atendidoPor:eu(),...(l.dono?{}:{dono:eu()})},'Respondeu o lead'); toast('Resposta registrada ✅'); break;
+      case 'respondi': await avanca('respondido',{respondidoEm:TS.now(),atendidoPor:eu(),...(l.dono?{}:{dono:donoInicial(l)})},'Respondeu o lead'); toast('Resposta registrada ✅'); break;
       case 'qualif': await ref.update({qualificado:true,historico:FV.arrayUnion(hist('Marcado como qualificado'))}); toast('Lead qualificado ⭐'); break;
       case 'compareceu': await avanca('compareceu',{compareceuEm:TS.now()},'Compareceu à visita'); toast('Registrado 👍'); break;
       case 'fuok': await ref.update({followUp:FV.delete(),historico:FV.arrayUnion(hist('Retorno feito'))}); toast('Retorno registrado'); break;
@@ -1324,6 +1330,54 @@ function modalCheckin(l,cp){
     {extra, mount:feito=>{ $('#ckSo').onclick=feito; }});
 }
 
+/* ======================= LINKS DE CONVITE (recepção e professores) ======================= */
+function modalLinkConvite(nome,link,meu=false){
+  const msg=`Bora treinar comigo na Sky Fit? 💪 Sua primeira aula é grátis! Garanta aqui: ${link}`;
+  abrirModal(`<h2>📲 Link de convite${meu?'':' — '+esc(nome)}</h2>
+    <p class="sm muted" style="margin-bottom:10px">${meu?'Divulgue no seu status, Instagram e para amigos. Quem se cadastrar por ele chega marcado como seu e soma pontos para você.':'Envie para '+esc(nome)+'. Os leads chegam marcados com o nome dele(a).'}</p>
+    <div class="linkbox">${esc(link)}</div>
+    <div class="row" style="gap:6px"><button class="btn" id="lcCopy" style="flex:1">📋 Copiar link</button>${navigator.share?'<button class="btn prim" id="lcShare" style="flex:1">📤 Compartilhar</button>':''}</div>
+    <label style="margin-top:10px">Mensagem pronta<textarea id="lcMsg" rows="3">${esc(msg)}</textarea></label>
+    <div class="row" style="gap:6px"><button class="btn" id="lcCopyM" style="flex:1">📋 Copiar mensagem</button><a class="btn wa" style="flex:1" target="_blank" rel="noopener" id="lcWa" href="https://wa.me/?text=${encodeURIComponent(msg)}">WhatsApp</a></div>
+    <button class="btn ghost full" data-fechar style="margin-top:8px">Fechar</button>`,()=>{
+    $('#lcCopy').onclick=()=>copiar(link);
+    $('#lcCopyM').onclick=()=>copiar($('#lcMsg').value);
+    $('#lcMsg').oninput=()=>$('#lcWa').href='https://wa.me/?text='+encodeURIComponent($('#lcMsg').value);
+    $('#lcShare')&&($('#lcShare').onclick=()=>navigator.share({title:'Aula grátis na Sky Fit',text:$('#lcMsg').value.replace(link,'').trim(),url:link}).catch(()=>{}));
+  });
+}
+function statsProf(cod){
+  const hj=new Date(), ini=new Date(hj.getFullYear(),hj.getMonth(),1);
+  const L=S.leads.filter(l=>l.divulgadoPor&&l.divulgadoPor.tipo==='prof'&&l.divulgadoPor.cod===cod);
+  return {leads:L.filter(l=>toD(l.chegadaEm)>=ini).length, veio:L.filter(l=>toD(l.chegadaEm)>=ini&&(l.etapaMax||0)>=3).length,
+    matr:L.filter(l=>l.matriculadoEm&&toD(l.matriculadoEm)>=ini&&!l.cancelouEm).length, total:L.length};
+}
+function boxProfessores(){
+  const D=S.cfg.divulgadores||[], bn=+S.cfg.bonusProf||0;
+  return `<div class="box"><h3>🎓 Professores divulgadores</h3>
+    <p class="sm muted" style="margin-bottom:8px">Cadastre os professores (não precisam de login). Cada um recebe um link de convite e os leads chegam marcados com o nome dele. Números deste mês.</p>
+    <div class="row" style="gap:6px;flex-wrap:nowrap"><input id="pfNome" placeholder="Nome do professor" style="flex:1;min-width:0"><button class="btn prim" id="pfAdd">Adicionar</button></div>
+    <label style="margin-top:8px">Bônus por matrícula vinda de professor (R$, opcional)<input id="pfBonus" type="number" min="0" step="0.01" value="${bn||''}" placeholder="0 = sem bônus"></label>
+    ${D.length?`<div class="tabw"><table><tr><th>Professor</th><th class="n">Leads</th><th class="n">Vieram</th><th class="n">Matrículas</th>${bn?'<th class="n">Bônus</th>':''}<th></th></tr>
+      ${D.map(d=>{ const st=statsProf(d.cod); return `<tr><td><b>${esc(d.nome)}</b></td><td class="n">${st.leads}</td><td class="n">${st.veio}</td><td class="n">${st.matr}</td>${bn?`<td class="n okTxt"><b>${moeda(st.matr*bn)}</b></td>`:''}
+        <td class="n" style="white-space:nowrap"><button class="btn sm" data-pflink="${esc(d.cod)}">📲 Link</button><button class="btn sm danger" data-pfdel="${esc(d.cod)}">✕</button></td></tr>`; }).join('')}</table></div>`:'<p class="sm muted">Nenhum professor cadastrado ainda.</p>'}</div>`;
+}
+async function salvarDivulgadores(D){
+  await db.collection('config').doc('geral').set({divulgadores:D},{merge:true});
+  await db.collection('config').doc('publico').set({divulgadores:D.map(d=>({cod:d.cod,nome:d.nome}))},{merge:true});
+}
+function ligarProfessores(){
+  const D=[...(S.cfg.divulgadores||[])];
+  $('#pfAdd').onclick=async()=>{ const nome=$('#pfNome').value.trim(); if(nome.length<2) return toast('Digite o nome do professor');
+    let cod=slug(nome), i=2; while(D.some(d=>d.cod===cod)) cod=slug(nome)+(i++);
+    D.push({cod,nome}); await salvarDivulgadores(D); toast(nome+' cadastrado 🎓'); };
+  $('#pfBonus').onchange=async e=>{ await db.collection('config').doc('geral').set({bonusProf:parseFloat(e.target.value)||0},{merge:true}); toast('Bônus salvo'); };
+  $('#main').querySelectorAll('[data-pflink]').forEach(b=>b.onclick=()=>{ const d=D.find(x=>x.cod===b.dataset.pflink); modalLinkConvite(d.nome,linkConvite('prof',d.cod)); });
+  $('#main').querySelectorAll('[data-pfdel]').forEach(b=>b.onclick=async()=>{ const d=D.find(x=>x.cod===b.dataset.pfdel);
+    if(!confirm('Remover '+d.nome+'? O link dele para de marcar os leads novos (os antigos continuam com o nome).')) return;
+    await salvarDivulgadores(D.filter(x=>x.cod!==d.cod)); toast('Removido'); });
+}
+
 /* ======================= FORMULÁRIO PÚBLICO DE CAPTURA ======================= */
 async function telaForm(preview=false){
   let pub={interesses:CONFIG_PADRAO.interesses, whatsAcademia:''};
@@ -1335,6 +1389,12 @@ async function telaForm(preview=false){
   const origem=mapa[src.toLowerCase()]||src||'Formulário';
   const campanha=(P.get('campanha')||P.get('utm_campaign')||'').slice(0,60);
   const indUrl=(P.get('ind')||'').slice(0,60);
+  const recCod=(P.get('rec')||'').toLowerCase().trim(), profCod=(P.get('prof')||'').toLowerCase().trim();
+  let div=null;
+  if(recCod){ const L=preview?S.usuarios.map(u=>({usuario:mostraLogin(u.email),papel:u.papel,uid:u.uid,nome:u.nome})):(pub.logins||[]);
+    const x=L.find(y=>y.usuario===recCod&&y.papel==='recepcao'); if(x&&x.uid) div={tipo:'rec',uid:x.uid,nome:String(x.nome).slice(0,60)}; }
+  if(!div&&profCod){ const x=(preview?(S.cfg.divulgadores||[]):(pub.divulgadores||[])).find(y=>y.cod===profCod); if(x) div={tipo:'prof',cod:x.cod,nome:String(x.nome).slice(0,60)}; }
+  const pnDiv=div?esc(div.nome.split(' ')[0]==='Prof.'||div.nome.split(' ')[0]==='Professor'?div.nome:div.nome.split(' ')[0]):'';
   const preco=isFinite(pub.precoMin)&&pub.precoMin>0?pub.precoMin:119.9;
   const capa=pub.fotoForm||'capa-form.jpg';
   const OPC=[['Musculação','💪','Musculação','ganhar força e definir'],['Aulas coletivas','🔥','Aulas coletivas','Sky Race, Cardio, dança'],['Lutas / Sky Box','🥊','Lutas · Sky Box','queimar e extravasar'],['Ainda não sei','✨','Ainda não sei','quero conhecer tudo']];
@@ -1346,6 +1406,7 @@ async function telaForm(preview=false){
       <div class="lpCapa" style="background-image:url('${esc(capa)}')"></div><div class="lpGlow"></div>
       <div class="lpHeroIn">
         <img src="${LOGO}" class="lpLogo" alt="Sky Fit Academia">
+        ${div?`<div class="lpConvite">💌 <b>${pnDiv}</b> te convidou para treinar na Sky Fit</div>`:''}
         <div class="lpBadge">🎟️ AULA EXPERIMENTAL GRÁTIS</div>
         <h1>Sua primeira aula na <span>melhor estrutura</span> de Rio Claro é por nossa conta.</h1>
         <p class="lpSub">1.000 m² climatizados, equipamentos de ponta e equipe com você no treino. Venha sentir antes de decidir.</p>
@@ -1418,8 +1479,8 @@ async function telaForm(preview=false){
     const b=$('#pBtn'); b.disabled=true; b.textContent='Enviando...';
     const hor=sel('#pHor');
     try{
-      await db.collection('leads').add({nome,whatsapp:whats,canal:campanha?'marketing':'recepcao',origem:campanha?'Anúncio · '+origem:(indUrl?'Indicação':(src?origem+' · formulário':'Formulário do site')),campanha,interesse:sel('#pInt'),
-        obs:hor?'Prefere treinar de '+hor.toLowerCase():'',indicadoPor:indUrl,bairro:'',status:'novo',etapaMax:0,
+      await db.collection('leads').add({nome,whatsapp:whats,canal:campanha?'marketing':'recepcao',origem:campanha?'Anúncio · '+origem:div?(div.tipo==='rec'?'Link da recepção':'Indicação de professor'):(indUrl?'Indicação':(src?origem+' · formulário':'Formulário do site')),campanha,interesse:sel('#pInt'),
+        obs:hor?'Prefere treinar de '+hor.toLowerCase():'',indicadoPor:div&&div.tipo==='prof'?div.nome:indUrl,...(div?{divulgadoPor:div}:{}),bairro:'',status:'novo',etapaMax:0,
         chegadaEm:FV.serverTimestamp(),criadoEm:FV.serverTimestamp(),registradoPor:{uid:'form',nome:'Formulário'},
         historico:[{acao:'Cadastro pelo formulário',por:'Formulário',em:Date.now()}],viaForm:true});
       const w=(pub.whatsAcademia||'').replace(/\D/g,''), pn=nome.split(' ')[0];
@@ -1600,7 +1661,7 @@ async function iniciarAtend(l,ref){
   const up={emAtendimento:{uid:S.perfil.uid,nome:S.perfil.nome,ini:Date.now()}};
   if(a&&a.ini){ up.atendimentos=FV.arrayUnion(fechaSessao(a,ativa?'Assumido por '+S.perfil.nome:'Encerrado automaticamente',!ativa));
     if(ativa&&a.uid!==S.perfil.uid) hs.push(hist('Assumiu o atendimento que estava com '+a.nome)); }
-  if(!l.respondidoEm&&ehLead(l)){ Object.assign(up,{respondidoEm:TS.now(),atendidoPor:eu(),...(l.dono?{}:{dono:eu()})});
+  if(!l.respondidoEm&&ehLead(l)){ Object.assign(up,{respondidoEm:TS.now(),atendidoPor:eu(),...(l.dono?{}:{dono:donoInicial(l)})});
     if(l.status==='novo'){ up.status='respondido'; up.etapaMax=Math.max(l.etapaMax||0,1); hs.push(hist('Respondeu o lead')); } }
   hs.push(hist('▶ Iniciou atendimento'));
   up.historico=FV.arrayUnion(...hs);
@@ -1659,7 +1720,12 @@ function iaDemo(l){
 
 
 /* ======================= CONTROLE: DONO, WHATSAPP, DUPLICADOS ======================= */
-const donoDe = l => l ? (l.dono || l.atendidoPor || null) : null;
+const divRec = l => l&&l.divulgadoPor&&l.divulgadoPor.tipo==='rec'&&l.divulgadoPor.uid ? {uid:l.divulgadoPor.uid,nome:l.divulgadoPor.nome} : null;
+const donoInicial = l => divRec(l) || eu();
+const donoDe = l => l ? (l.dono || l.atendidoPor || divRec(l) || null) : null;
+const baseLink = () => location.href.split('?')[0].split('#')[0];
+const linkConvite = (tipo,cod) => baseLink()+'?cadastro&'+tipo+'='+encodeURIComponent(cod);
+const slug = t => semAcento(t).replace(/^prof(\.|essora?)?\s+/,'').replace(/[^a-z0-9]+/g,'').slice(0,20) || 'prof';
 const ehMeu = l => { const d=donoDe(l); return d && d.uid===S.perfil.uid; };
 function chaveTel(t){ let d=String(t||'').replace(/\D/g,''); if(d.length>11&&d.startsWith('55')) d=d.slice(2); return d.length>=10 ? d.slice(0,2)+d.slice(-8) : ''; }
 function duplicadosDe(tel,ignorarId){ const k=chaveTel(tel); return k ? S.leads.filter(l=>l.id!==ignorarId&&chaveTel(l.whatsapp)===k) : []; }
@@ -1990,7 +2056,7 @@ async function notificarSistema(titulo,corpo){
 
 
 /* ======================= DESEMPENHO: PONTUAÇÃO, NOTA E BONIFICAÇÃO ======================= */
-const PESOS_PADRAO={cadastro:1,resp15:2,resp:1,msg:0.5,msgMax:3,visita:3,veio:3,matr:10,renov:5,checkin:1,voltou:5};
+const PESOS_PADRAO={cadastro:1,resp15:2,resp:1,msg:0.5,msgMax:3,visita:3,veio:3,matr:10,renov:5,checkin:1,voltou:5,conv:1,convVeio:3,convMatr:5};
 const pesos=()=>({...PESOS_PADRAO,...(S.cfg.pesos||{})});
 const CRITERIOS=[['atendimento','Atendimento ao cliente'],['proatividade','Proatividade (correr atrás)'],['organizacao','Organização do app em dia']];
 const RE_MSG=/WhatsApp|Cadência|Lembrete|Repescagem|resposta rápida|Check-in|reconquista|Enviou/i;
@@ -2009,7 +2075,7 @@ function equipeRecepcao(){
 }
 function desempenho(ini,fim){
   const P=pesos(), t0=ini.getTime(), t1=fim.getTime(), E=equipeRecepcao();
-  const R={}; E.forEach(u=>R[u.uid]={uid:u.uid,nome:u.nome,cad:0,atend:0,rap:0,msgs:0,vis:0,veio:0,matr:0,renov:0,check:0,voltou:0,tempos:[],pontos:0,sess:0,sessMin:0,contin:0,_lm:new Set()});
+  const R={}; E.forEach(u=>R[u.uid]={uid:u.uid,nome:u.nome,cad:0,atend:0,rap:0,msgs:0,vis:0,veio:0,matr:0,renov:0,check:0,voltou:0,tempos:[],pontos:0,sess:0,sessMin:0,contin:0,_lm:new Set(),conv:0,convQ:0,convV:0,convM:0});
   const quem=(h)=>{ if(h.uid&&R[h.uid]) return R[h.uid]; const u=E.find(x=>x.nome===h.por); return u?R[u.uid]:null; };
   const dentro=t=>{ const v=t?(t.toDate?t.toDate().getTime():+t):0; return v>=t0&&v<t1; };
   S.leads.forEach(l=>{
@@ -2017,6 +2083,8 @@ function desempenho(ini,fim){
     if(l.atendidoPor&&R[l.atendidoPor.uid]&&ehLead(l)&&l.respondidoEm&&dentro(l.respondidoEm)){ const x=R[l.atendidoPor.uid], m=minEntre(toD(l.chegadaEm),toD(l.respondidoEm));
       x.atend++; if(m>=0){ x.tempos.push(m); if(m<=(+S.cfg.alertaMin||15)) x.rap++; } }
     const f=l.fechadoPor||l.atendidoPor; if(f&&R[f.uid]&&l.matriculadoEm&&dentro(l.matriculadoEm)){ if(ehLead(l)) R[f.uid].matr++; else R[f.uid].renov++; }
+    { const dr=divRec(l); if(dr&&R[dr.uid]&&dentro(l.chegadaEm)){ const x=R[dr.uid]; x.conv++;
+        if(!desq(l)&&!l.duplicadoDe&&(l.etapaMax||0)>=1) x.convQ++; if((l.etapaMax||0)>=3) x.convV++; if(l.status==='matriculado') x.convM++; } }
     sessoesDe(l).forEach(z=>{ const x=R[z.uid]; if(!x||!(z.ini>=t0&&z.ini<t1)) return; x.sess++; x.sessMin+=z.dur||0; if(!z.auto) x.sessT=(x.sessT||0)+1;
       const d=donoDe(l); if(d&&d.uid!==z.uid) x.contin++; if(l.status==='matriculado') x._lm.add(l.id); });
     const porDia={};
@@ -2030,7 +2098,7 @@ function desempenho(ini,fim){
   });
   (S.exalunos||[]).forEach(e=>(e.contatos||[]).forEach(c=>{ if(c.em>=t0&&c.em<t1){ const u=E.find(x=>x.nome===c.por); if(u) R[u.uid].msgs++; } }));
   Object.values(R).forEach(x=>{ x.tMed=avg(x.tempos); x.sessMatr=x._lm.size;
-    x.pontos=Math.round((x.cad*P.cadastro+x.rap*P.resp15+(x.atend-x.rap)*P.resp+x.msgs*P.msg+x.vis*P.visita+x.veio*P.veio+x.matr*P.matr+x.renov*P.renov+x.check*P.checkin+x.voltou*P.voltou)*10)/10; });
+    x.pontos=Math.round((x.cad*P.cadastro+x.rap*P.resp15+(x.atend-x.rap)*P.resp+x.msgs*P.msg+x.vis*P.visita+x.veio*P.veio+x.matr*P.matr+x.renov*P.renov+x.check*P.checkin+x.voltou*P.voltou+x.convQ*P.conv+x.convV*P.convVeio+x.convM*P.convMatr)*10)/10; });
   const lista=Object.values(R).sort((a,b)=>b.pontos-a.pontos); lista.forEach((x,i)=>x.pos=i+1);
   return lista;
 }
@@ -2048,11 +2116,11 @@ function vDesempenho(){
       <div class="bt" style="margin-top:6px"><div style="width:${Math.min(100,matrMes/metaEq*100)}%;background:${matrMes>=metaEq?'var(--grn)':'var(--acc)'}"></div></div>
       ${matrMes>=metaEq?`<p class="sm okTxt" style="margin-top:6px">🎉 Meta da equipe batida!</p>${adm?'<button class="btn sm prim" id="dsBonEq" style="margin-top:6px">🎁 Bonificar a equipe</button>':''}`:''}</div>`:'';
   const num=(v,l)=>`<div class="dNum"><b>${v}</b><span>${l}</span></div>`;
-  const cartao=x=>`<div class="dCard"><div class="dNums">${num(x.sess,'atendimentos')}${num(x.cad,'cadastrou')}${num(x.atend,'1º contato')}${num(x.msgs,'mensagens')}${num(x.vis,'agendou visita')}${num(x.veio,'vieram')}${num(x.matr,'matriculou')}${x.renov?num(x.renov,'renovações'):''}${x.check?num(x.check,'check-ins'):''}${x.voltou?num(x.voltou,'ex-alunos voltaram'):''}</div>
+  const cartao=x=>`<div class="dCard"><div class="dNums">${num(x.sess,'atendimentos')}${num(x.cad,'cadastrou')}${num(x.atend,'1º contato')}${num(x.msgs,'mensagens')}${num(x.vis,'agendou visita')}${num(x.veio,'vieram')}${num(x.matr,'matriculou')}${x.renov?num(x.renov,'renovações'):''}${x.check?num(x.check,'check-ins'):''}${x.voltou?num(x.voltou,'ex-alunos voltaram'):''}${x.conv?num(x.conv,'pelo seu link'):''}${x.convM?num(x.convM,'matrículas do link'):''}</div>
     <div class="sm muted" style="margin-top:6px">Tempo médio de resposta: <b>${fmtMin(x.tMed)}</b> · ${x.rap} respondidos em até ${+S.cfg.alertaMin||15} min</div>
     ${x.sess?`<div class="sm muted">⏱ Tempo em atendimento: <b>${fmtMin(x.sessMin)}</b> · média <b>${fmtMin(x.sessT?x.sessMin/x.sessT:0)}</b> por atendimento${x.contin?` · ${x.contin} continuado(s) de colegas`:''}${x.sessMatr?` · ${x.sessMatr} cliente(s) atendido(s) que matricularam`:''}</div>`:''}</div>`;
   if(!adm){
-    const eu_=D.find(x=>x.uid===S.perfil.uid)||{pos:'-',pontos:0,cad:0,atend:0,rap:0,msgs:0,vis:0,veio:0,matr:0,renov:0,check:0,voltou:0,sess:0,sessMin:0,contin:0,sessMatr:0};
+    const eu_=D.find(x=>x.uid===S.perfil.uid)||{pos:'-',pontos:0,cad:0,atend:0,rap:0,msgs:0,vis:0,veio:0,matr:0,renov:0,check:0,voltou:0,sess:0,sessMin:0,contin:0,sessMatr:0,conv:0,convQ:0,convV:0,convM:0};
     const nota=notaDe(S.perfil.uid,mesChave(new Date())), notaAnt=notaDe(S.perfil.uid,mesChave(new Date(hj.getFullYear(),hj.getMonth()-1,1)));
     const bon=bonusDe(S.perfil.uid,mes);
     const frase=eu_.pos===1&&eu_.pontos>0?'🥇 Você está em 1º lugar! Continue assim!':eu_.pontos>0?`Você está em ${eu_.pos}º lugar. Cada atendimento rápido e cada visita agendada somam pontos 💪`:'Comece agora: responda rápido e agende visitas para somar pontos 💪';
@@ -2063,13 +2131,13 @@ function vDesempenho(){
       ${nota||notaAnt?`<div class="box"><h3>⭐ Sua nota de empenho</h3>${[nota&&['este mês',nota],notaAnt&&['mês passado',notaAnt]].filter(Boolean).map(([t,n])=>`<div style="margin-bottom:8px"><div class="row sm"><b>${t}</b><span class="estr">${estrelas(n.media)} ${dec(n.media,1)}</span></div>
         <div class="sm muted">${CRITERIOS.map(([k,r])=>r+': '+(n.crit?.[k]||'—')).join(' · ')}</div>${n.comentario?`<div class="comentario">💬 ${esc(n.comentario)}</div>`:''}</div>`).join('')}</div>`:''}
       ${bon.length?`<div class="box"><h3>🎁 Suas bonificações</h3>${bon.map(b=>`<div class="row sm"><span>${esc(b.motivo)}</span><b class="okTxt">${moeda(b.valor)}</b></div>`).join('')}</div>`:''}
-      <p class="sm muted">Pontos: cadastro ${pesos().cadastro} · resposta rápida ${pesos().resp15} · mensagem ${pesos().msg} · visita agendada ${pesos().visita} · compareceu ${pesos().veio} · matrícula ${pesos().matr}.</p>`;
+      <p class="sm muted">Convites pelo seu link: lead válido ${pesos().conv} · veio ${pesos().convVeio} · matriculou ${pesos().convMatr}. Pontos: cadastro ${pesos().cadastro} · resposta rápida ${pesos().resp15} · mensagem ${pesos().msg} · visita agendada ${pesos().visita} · compareceu ${pesos().veio} · matrícula ${pesos().matr}.</p>`;
   } else {
     const max=Math.max(1,...D.map(x=>x.pontos));
     $('#main').innerHTML=`${chips}${caixaEquipe}
       <div class="box"><h3>🏆 Ranking ${tit}</h3>${D.map(x=>`<div class="dRk"><span>${['🥇','🥈','🥉'][x.pos-1]||x.pos+'º'} <b>${esc(x.nome)}</b></span><div class="bt"><div style="width:${x.pontos/max*100}%"></div></div><b>${dec(x.pontos,1)}</b></div>`).join('')||'<p class="muted sm">Cadastre recepcionistas em Equipe.</p>'}</div>
-      <div class="box"><h3>Números ${tit}</h3><div class="tabw"><table class="tmk"><tr><th>Recepcionista</th><th class="n">Pontos</th><th class="n">Atendimentos</th><th class="n">Tempo atend.</th><th class="n">Continuou de colegas</th><th class="n">Cadastrou</th><th class="n">1º contato</th><th class="n">Resp. rápida</th><th class="n">Tempo médio</th><th class="n">Mensagens</th><th class="n">Visitas</th><th class="n">Vieram</th><th class="n">Matrículas</th><th class="n">Renov.</th><th class="n">Nota do mês</th></tr>
-        ${D.map(x=>{ const n=notaDe(x.uid,mes); return `<tr><td><b>${esc(x.nome)}</b></td><td class="n"><b>${dec(x.pontos,1)}</b></td><td class="n">${x.sess}</td><td class="n">${x.sess?fmtMin(x.sessMin):'—'}</td><td class="n">${x.contin}</td><td class="n">${x.cad}</td><td class="n">${x.atend}</td><td class="n">${x.rap}</td><td class="n">${fmtMin(x.tMed)}</td><td class="n">${x.msgs}</td><td class="n">${x.vis}</td><td class="n">${x.veio}</td><td class="n">${x.matr}</td><td class="n">${x.renov}</td><td class="n">${n?dec(n.media,1)+' ★':'—'}</td></tr>`; }).join('')}</table></div></div>
+      <div class="box"><h3>Números ${tit}</h3><div class="tabw"><table class="tmk"><tr><th>Recepcionista</th><th class="n">Pontos</th><th class="n">Atendimentos</th><th class="n">Tempo atend.</th><th class="n">Continuou de colegas</th><th class="n">Convites (link)</th><th class="n">Cadastrou</th><th class="n">1º contato</th><th class="n">Resp. rápida</th><th class="n">Tempo médio</th><th class="n">Mensagens</th><th class="n">Visitas</th><th class="n">Vieram</th><th class="n">Matrículas</th><th class="n">Renov.</th><th class="n">Nota do mês</th></tr>
+        ${D.map(x=>{ const n=notaDe(x.uid,mes); return `<tr><td><b>${esc(x.nome)}</b></td><td class="n"><b>${dec(x.pontos,1)}</b></td><td class="n">${x.sess}</td><td class="n">${x.sess?fmtMin(x.sessMin):'—'}</td><td class="n">${x.contin}</td><td class="n">${x.conv?`${x.conv} · ${x.convV} vieram · ${x.convM} matr.`:'—'}</td><td class="n">${x.cad}</td><td class="n">${x.atend}</td><td class="n">${x.rap}</td><td class="n">${fmtMin(x.tMed)}</td><td class="n">${x.msgs}</td><td class="n">${x.vis}</td><td class="n">${x.veio}</td><td class="n">${x.matr}</td><td class="n">${x.renov}</td><td class="n">${n?dec(n.media,1)+' ★':'—'}</td></tr>`; }).join('')}</table></div></div>
       <div class="box"><h3>⭐ Nota de empenho e 🎁 bonificação (${new Date(mes+'-01T12:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})})</h3>
         ${D.map(x=>{ const n=notaDe(x.uid,mes), b=bonusDe(x.uid,mes); return `<div class="dAdm"><div><b>${esc(x.nome)}</b><div class="sm muted">${n?`<span class="estr">${estrelas(n.media)}</span> ${dec(n.media,1)}${n.comentario?' · “'+esc(n.comentario)+'”':''}`:'Sem nota ainda'}${b.length?` · bonificações: <b class="okTxt">${moeda(b.reduce((s,y)=>s+(+y.valor||0),0))}</b>`:''}</div></div>
           <div class="row" style="gap:6px"><button class="btn sm" data-dnota="${x.uid}">⭐ ${n?'Editar nota':'Dar nota'}</button><button class="btn sm" data-dbon="${x.uid}">🎁 Bonificar</button></div></div>`; }).join('')}
@@ -2881,10 +2949,13 @@ function vEquipe(){
       ${U.map(u=>`<tr><td><b>${esc(u.nome)}</b></td><td class="sm">${esc(mostraLogin(u.email))}</td>
         <td><span class="tag ${u.papel==='admin'?'adm':''}">${DEVS.includes((u.email||'').toLowerCase())?'👨‍💻 Desenvolvedor':({admin:'Administrador',agencia:'Agência',recepcao:'Recepção'}[u.papel]||u.papel)}</span> ${u.ativo?'':'<span class="tag off">Inativo</span>'}</td>
         <td class="n">${u.papel==='recepcao'?`<button class="btn sm" data-meta="${u.uid}">🎯 ${(S.cfg.metas||{})[u.uid]||'—'}</button>`:''}</td>
-        <td class="n" style="white-space:nowrap"><button class="btn sm" data-ren="${u.uid}">Renomear</button>
+        <td class="n" style="white-space:nowrap">${u.papel==='recepcao'?`<button class="btn sm" data-rlink="${u.uid}">📲 Link</button>`:''}<button class="btn sm" data-ren="${u.uid}">Renomear</button>
           ${u.uid!==S.perfil.uid?`<button class="btn sm" data-ver="${u.uid}">👁 Senha</button><button class="btn sm" data-reset="${u.uid}">🔑 Trocar</button>`:''}
           ${u.uid!==S.perfil.uid?`<button class="btn sm ${u.ativo?'danger':''}" data-at="${u.uid}">${u.ativo?'Desativar':'Ativar'}</button>`:''}</td></tr>`).join('')}
-    </table></div></div>`;
+    </table></div></div>
+    ${boxProfessores()}`;
+  ligarProfessores();
+  $('#main').querySelectorAll('[data-rlink]').forEach(b=>b.onclick=()=>{ const u=S.usuarios.find(x=>x.uid===b.dataset.rlink); modalLinkConvite(u.nome,linkConvite('rec',mostraLogin(u.email))); });
   $('#fU').onsubmit=async e=>{
     e.preventDefault(); const b=e.target.querySelector('button'); b.disabled=true;
     const nome=$('#uNome').value.trim(), bruto=$('#uEmail').value.trim(), papel=$('#uPapel').value, senha=$('#uSenha').value;
@@ -3070,7 +3141,7 @@ function vConfig(){
     <button class="btn" id="cBk" style="margin:8px 0 4px">💾 Baixar backup agora</button>
     <h3 style="margin-top:22px">🏆 Desempenho da recepção</h3>
     <p class="muted sm" style="margin-bottom:8px">Pontos por ação (cada recepcionista vê só os dela e a posição no ranking).</p>
-    <div class="pesos">${[['cadastro','Cadastro de lead'],['resp15','Resposta rápida'],['resp','Resposta (depois do prazo)'],['msg','Mensagem enviada'],['msgMax','Máx. de mensagens que pontuam por lead/dia'],['visita','Visita agendada'],['veio','Cliente compareceu'],['matr','Matrícula'],['renov','Renovação/troca de plano'],['checkin','Check-in pós-venda'],['voltou','Ex-aluno voltou']].map(([k,t])=>`<label>${t}<input type="number" step="0.5" min="0" data-peso="${k}" value="${pesos()[k]}"></label>`).join('')}</div>
+    <div class="pesos">${[['cadastro','Cadastro de lead'],['resp15','Resposta rápida'],['resp','Resposta (depois do prazo)'],['msg','Mensagem enviada'],['msgMax','Máx. de mensagens que pontuam por lead/dia'],['visita','Visita agendada'],['veio','Cliente compareceu'],['matr','Matrícula'],['renov','Renovação/troca de plano'],['checkin','Check-in pós-venda'],['voltou','Ex-aluno voltou'],['conv','Convite pelo link (lead válido)'],['convVeio','Convite: pessoa veio'],['convMatr','Convite: pessoa matriculou']].map(([k,t])=>`<label>${t}<input type="number" step="0.5" min="0" data-peso="${k}" value="${pesos()[k]}"></label>`).join('')}</div>
     <div class="duas"><label>Meta da equipe (matrículas novas no mês, 0 = não usar)<input type="number" id="cMetaEq" min="0" value="${c.metaEquipe||0}"></label>
       <label class="check" style="align-self:end"><input type="checkbox" id="cTvRk" ${c.tvRanking===true?'checked':''}> Mostrar ranking com nomes no 📺 Modo TV</label></div>
     <h3 style="margin-top:22px">🚦 Metas de custo (tráfego)</h3>
