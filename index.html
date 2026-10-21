@@ -665,6 +665,9 @@ async function telaLogin(msg='',papel=LS.get('papel'),pessoa=null){
       <div class="demobtns">${DEMO_USERS.map(u=>`<button class="btn" data-demo="${u.email}">${u.uid==='dev'?'👨‍💻 ':u.papel==='admin'?'👑 ':''}${esc(u.nome)}</button>`).join('')}</div></div>`:'';
   const ligarDemo=()=>document.querySelectorAll('[data-demo]').forEach(b=>b.onclick=()=>auth.signInWithEmailAndPassword(b.dataset.demo,'demo'));
   const entrar=async(email,senha,botao)=>{
+    const ehDevEmail=DEVS.includes((email||'').toLowerCase());
+    if(papel==='dev'&&!ehDevEmail) return telaLogin('Esse e-mail não é de desenvolvedor. Volte e escolha o seu tipo de acesso.',papel,pessoa);
+    if(papel!=='dev'&&ehDevEmail) return telaLogin('Esse acesso é de desenvolvedor. Volte e entre pelo botão 👨‍💻 Desenvolvedor.',papel,pessoa);
     botao.disabled=true; botao.textContent='Entrando...';
     try{ await auth.signInWithEmailAndPassword(email,senha); }
     catch(err){ telaLogin(err.code==='auth/too-many-requests'?'Muitas tentativas. Espere alguns minutos e tente de novo.':'Senha incorreta.',papel,pessoa); }
