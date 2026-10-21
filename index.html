@@ -1217,7 +1217,7 @@ function modalIA(l){
           const url=S.cfg.iaUrl||IA_URL; if(!url) throw new Error('IA ainda não configurada. O administrador precisa preencher em Ajustes → Agente de IA.');
           const token=await auth.currentUser.getIdToken();
           const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({leadId:l.id})});
-          r=await resp.json(); if(!resp.ok) throw new Error(r.erro||'Falha na IA');
+          r=await lerJSON(resp); if(!resp.ok) throw new Error(r.erro||'Falha na IA');
         }
         r.em=Date.now(); r.por=S.perfil.nome;
         await ref.update({ia:r, historico:FV.arrayUnion(hist('Consultou a IA de vendas'))});
@@ -1999,6 +1999,9 @@ function modalHistorico(c){
 
 /* ---------- criativos (arquivos e links) ---------- */
 const ehUrl=u=>/^https?:\/\//i.test(u||'');
+const urlFuncaoOk=u=>/^https:\/\/[^\s/]+\.(cloudfunctions\.net|run\.app)\//i.test(u||'');
+async function lerJSON(resp){ const t=await resp.text(); try{ return JSON.parse(t); }catch(e){
+  throw new Error(resp.status===404?'Endereço da função não encontrado (404). Confira a URL em Ajustes → Agente de IA.':'A função da IA não respondeu corretamente. Confira se ela foi publicada e se a URL está certa.'); } }
 function miniatura(a){
   const leg=esc(a.legenda||a.nome||'');
   if(a.tipo==='imagem') return `<a class="thumb" href="${esc(a.url)}" target="_blank" rel="noopener" title="${leg}"><img src="${esc(a.url)}" alt="${leg}" loading="lazy"></a>`;
@@ -2395,9 +2398,9 @@ function vConfig(){
   $('#main').innerHTML=`<div class="box iaBox">
     <h3>🤖 Agente de IA (chave da API)</h3>
     <p class="muted sm">A chave fica guardada no servidor e nunca volta para nenhum celular ou computador. Só a função da IA consegue usá-la.</p>
-    <label style="margin-top:8px">URL da função (aparece no Firebase depois de publicar a função)<input id="iaU" value="${esc(c.iaUrl||'')}" placeholder="https://southamerica-east1-SEU-PROJETO.cloudfunctions.net/sugerirResposta"></label>
+    <label style="margin-top:8px">URL da função (aparece no Firebase depois de publicar a função)<input id="iaU" type="url" name="url-funcao-ia" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" value="${esc(urlFuncaoOk(c.iaUrl)?c.iaUrl:(c.iaUrl||''))}" placeholder="https://southamerica-east1-SEU-PROJETO.cloudfunctions.net/sugerirResposta"></label>
     <label>Modelo<select id="iaM">${[['claude-sonnet-5-5','Claude Sonnet 5.5 (melhor qualidade)'],['claude-haiku-5-5','Claude Haiku 5.5 (mais rápido e barato)']].map(([v,t])=>`<option value="${v}" ${(c.iaModelo||'claude-sonnet-5-5')===v?'selected':''}>${t}</option>`).join('')}</select></label>
-    <label>Chave da API (console.anthropic.com)<input id="iaK" type="password" autocomplete="off" placeholder="${c.iaChaveFinal?'✔ chave salva (termina em '+esc(c.iaChaveFinal)+') — cole outra para trocar':'sk-ant-...'}"></label>
+    <label>Chave da API (console.anthropic.com)<input id="iaK" type="password" autocomplete="new-password" name="chave-api-ia" data-lpignore="true" placeholder="${c.iaChaveFinal?'✔ chave salva (termina em '+esc(c.iaChaveFinal)+') — cole outra para trocar':'sk-ant-...'}"></label>
     <div class="row"><button class="btn" id="iaSalvarK" style="flex:1">🔒 Salvar chave</button><button class="btn" id="iaTeste" style="flex:1">⚡ Testar IA</button></div>
     <p class="sm" id="iaStatus" style="margin-top:6px"></p>
     </div>
@@ -2490,21 +2493,23 @@ function vConfig(){
   };
   $('#iaTeste').onclick=async()=>{
     const st=$('#iaStatus'), url=$('#iaU').value.trim();
+    if(url&&!urlFuncaoOk(url)){ st.innerHTML='<span class="red">❌ Isso não é a URL da função. Ela começa com https:// e termina em cloudfunctions.net/sugerirResposta (ou run.app). Apague e cole a URL certa depois de publicar a função.</span>'; return; }
     if(DEMO){ st.textContent='Modo demonstração: o teste real funciona depois de configurar o Firebase.'; return; }
     if(!url){ st.textContent='Preencha a URL da função e salve os ajustes.'; return; }
     st.textContent='Testando...';
     try{
       const token=await auth.currentUser.getIdToken();
       const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({teste:true})});
-      const j=await r.json(); if(!r.ok) throw new Error(j.erro||r.status);
+      const j=await lerJSON(r); if(!r.ok) throw new Error(j.erro||r.status);
       st.innerHTML='<span style="color:var(--grn)">✅ IA funcionando ('+esc(j.modelo)+')</span>';
     }catch(err){ st.innerHTML='<span class="red">❌ '+esc(err.message)+'</span>'; }
   };
   $('#lkVer').onclick=()=>{ S.formParams=gerar(); S.previewForm=true; telaForm(true); window.scrollTo(0,0); };
   $('#cSalvar').onclick=async()=>{
+    if($('#iaU').value.trim()&&!urlFuncaoOk($('#iaU').value.trim())){ toast('URL da IA inválida foi ignorada (parece e-mail ou outro texto)'); $('#iaU').value=''; }
     await db.collection('config').doc('geral').set({origens:lista('#cOrig'),interesses:lista('#cInt'),objecoes:lista('#cObj'),
       alertaMin:parseInt($('#cAl').value)||15,msgWhats:$('#cMsg').value,baseIA:$('#cBase').value,
-      iaUrl:$('#iaU').value.trim(),iaModelo:$('#iaM').value,
+      iaUrl:urlFuncaoOk($('#iaU').value.trim())?$('#iaU').value.trim():'',iaModelo:$('#iaM').value,
       msgLembreteDia:$('#cLD').value,msgLembreteHora:$('#cLH').value,cadencia:porDia('#cCad'),checkins:porDia('#cCk'),
       msgRepescagem:$('#cRep').value,diasRepescagem:parseInt($('#cRepD').value)||30,comTipo:$('#cmTipo').value,comValor:parseFloat($('#cmVal').value)||0,comPct:parseFloat($('#cmPct').value)||0,comPorPlano:$('#cmPlano').value,
       comSplit:Math.min(100,Math.max(0,parseFloat($('#cmSplit').value)||0)),comBonus:parseFloat($('#cmBonus').value)||0,comCarencia:parseInt($('#cmCar').value)||0,
