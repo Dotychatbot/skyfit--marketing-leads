@@ -232,73 +232,75 @@ details.box summary{cursor:pointer;font-size:14px}
 .tag{font-size:11px;padding:2px 7px;border-radius:8px;background:var(--bg)} .tag.adm{background:#dbeafe;color:var(--navy)} .tag.off{background:#fee2e2;color:var(--red)}
 
 /* ===== Landing do formulário (stories) ===== */
-body.lpBody{background:#071a33}
-.lp{font-family:Montserrat,system-ui,sans-serif;color:#fff;background:#071a33;min-height:100vh;overflow-x:hidden;padding-bottom:90px}
+body.lpBody{background:#08172e}
+.lp{--lpAz:#08172e;--lpAz2:#0d2547;--lpVm:#e5303c;--lpTx:#0f1b2d;--lpMu:#5b6b80;--lpBd:#dfe5ee;
+  font-family:Inter,system-ui,sans-serif;color:#fff;background:var(--lpAz);min-height:100vh;overflow-x:hidden;padding-bottom:84px;-webkit-font-smoothing:antialiased}
+.lp h1,.lp h2{font-family:'Barlow Condensed',Inter,sans-serif;text-transform:uppercase;font-weight:700;letter-spacing:.005em}
 .lpVoltar{position:fixed;top:10px;left:10px;z-index:30}
-.lpHero{position:relative;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 22px 60px;overflow:hidden;
-  background:radial-gradient(120% 80% at 50% 0%,#14539a 0%,#0a2a55 45%,#071a33 100%)}
-.lpCapa{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.38;transform:scale(1.08);animation:lpZoom 16s ease-in-out infinite alternate}
-.lpCapa::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,26,51,.35),rgba(7,26,51,.92))}
-.lpGlow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(239,51,64,.45),transparent 65%);top:-160px;right:-200px;filter:blur(10px);animation:lpFlut 9s ease-in-out infinite}
-.lpHeroIn{position:relative;max-width:520px;animation:lpUp .9s ease both}
-.lpLogo{width:120px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.4));margin-bottom:14px;animation:lpUp .8s ease both}
-.lpConvite{background:#fff;color:#0a2a55;display:inline-block;padding:10px 16px;border-radius:14px;font-size:14px;font-weight:600;margin-bottom:12px;box-shadow:0 10px 26px rgba(0,0,0,.3);animation:lpPop .6s .3s cubic-bezier(.2,1.6,.4,1) both}
-.lpBadge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);padding:8px 14px;border-radius:999px;font-weight:800;font-size:12px;letter-spacing:.08em;margin-bottom:16px}
-.lpHero h1{font-size:clamp(28px,8vw,44px);line-height:1.08;font-weight:900;margin:0 0 14px;letter-spacing:-.01em}
-.lpHero h1 span{background:linear-gradient(90deg,#ff5a66,#EF3340,#ffb3b9,#EF3340);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:lpBrilho 5s linear infinite}
-.lpSub{font-size:16px;line-height:1.5;color:#dbe6f5;margin:0 auto 24px;max-width:430px;font-weight:500}
-.lpCta{display:block;width:100%;max-width:400px;margin:0 auto;border:0;cursor:pointer;text-decoration:none;text-align:center;font-family:inherit;font-weight:800;font-size:17px;color:#fff;
-  padding:18px 22px;border-radius:16px;background:linear-gradient(135deg,#ff4d5a,#d81f2e);box-shadow:0 12px 30px rgba(239,51,64,.45),inset 0 -3px 0 rgba(0,0,0,.15);transition:transform .15s}
-.lpCta:active{transform:scale(.97)} .lpCta:disabled{opacity:.7}
-.pulse{animation:lpPulse 2.2s ease-in-out infinite}
-.lpMini{font-size:13px;color:#aac0de;margin-top:12px;font-weight:600}
-.lpSeta{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-size:28px;color:#aac0de;animation:lpSeta 1.6s ease-in-out infinite}
-.lpSec{padding:34px 18px;max-width:560px;margin:0 auto}
-.lpGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.lpCard{background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
-.lpCard b{font-size:14px} .lpCard span{font-size:12px;color:#aac0de;line-height:1.35}
-.lpIco{font-size:26px;margin-bottom:4px}
-.lpEsp{text-align:center}
-.lp h2{font-size:24px;font-weight:900;line-height:1.15;margin:0 0 14px}
-.lpTags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-.lpTags span{padding:10px 14px;border-radius:12px;background:#104D82;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(16,77,130,.5)}
-.lpPreco{margin-top:18px;color:#dbe6f5;font-size:15px} .lpPreco b{color:#fff;font-size:20px}
-.lpFormBox{background:#fff;color:#0f172a;border-radius:24px;padding:24px 18px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
-.lpFormBox h2{color:#0a2a55}
-.lpSub2{color:#475569;font-size:15px;line-height:1.5;margin:-4px 0 18px}
+.lpHero{position:relative;min-height:100svh;display:flex;align-items:flex-end;padding:48px 24px 56px;overflow:hidden;background:linear-gradient(180deg,#0f2c55 0%,var(--lpAz) 75%)}
+.lpCapa{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.04);animation:lpZoom 20s ease-in-out infinite alternate}
+.lpCapa::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,23,46,.25) 0%,rgba(8,23,46,.7) 45%,var(--lpAz) 100%)}
+.lpHeroIn{position:relative;width:100%;max-width:520px;margin:0 auto;animation:lpUp .8s ease both}
+.lpLogo{width:96px;margin-bottom:28px}
+.lpConvite{font-size:13px;color:#c9d5e6;margin:0 0 18px;padding-left:12px;border-left:2px solid var(--lpVm)}
+.lpEyebrow{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#ff6b75;margin:0 0 10px}
+.lpEsq{color:var(--lpVm)}
+.lpHero h1{font-size:clamp(40px,11vw,60px);line-height:.96;margin:0 0 18px}
+.lpHero h1 em{font-style:normal;color:var(--lpVm)}
+.lpSub{font-size:16px;line-height:1.55;color:#c9d5e6;margin:0 0 28px;max-width:440px}
+.lpCta{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;border:0;cursor:pointer;text-decoration:none;font-family:inherit;font-weight:600;font-size:16px;letter-spacing:.01em;color:#fff;
+  padding:17px 22px;border-radius:10px;background:var(--lpVm);transition:background .2s,transform .15s}
+.lpCta svg{width:18px;height:18px;transition:transform .2s} .lpCta:hover svg{transform:translateX(3px)}
+.lpCta:hover{background:#cc2632} .lpCta:active{transform:scale(.985)} .lpCta:disabled{opacity:.65}
+.lpMini{font-size:13px;color:#8fa3bd;margin:14px 0 0;text-align:center}
+.lpSec{padding:56px 24px 8px;max-width:560px;margin:0 auto}
+.lp h2{font-size:34px;line-height:1;margin:0 0 26px}
+.lpGrid{display:grid;gap:0;border-top:1px solid rgba(255,255,255,.1)}
+.lpCard{display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.lpCard b{display:block;font-size:15px;font-weight:600;margin-bottom:3px} .lpCard span{font-size:14px;color:#9fb1c8;line-height:1.45}
+.lpIco{flex:none;width:44px;height:44px;border-radius:10px;background:rgba(229,48,60,.12);color:#ff6b75;display:flex;align-items:center;justify-content:center}
+.lpIco svg{width:22px;height:22px}
+.lpEspL{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden}
+.lpEspL div{background:var(--lpAz2);padding:18px 16px;display:flex;flex-direction:column;gap:4px}
+.lpEspL span{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--lpVm)}
+.lpEspL b{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-transform:uppercase}
+.lpEspL small{font-size:13px;color:#9fb1c8;line-height:1.4}
+.lpPreco{margin:22px 0 0;color:#9fb1c8;font-size:15px} .lpPreco b{color:#fff;font-weight:600}
+.lpFormSec{padding-top:56px}
+.lpFormBox{background:#fff;color:var(--lpTx);border-radius:16px;padding:28px 20px}
+.lpFormBox h2{color:var(--lpTx);margin-bottom:10px;font-size:32px}
+.lpSub2{color:var(--lpMu);font-size:15px;line-height:1.55;margin:0 0 22px}
 .lpCampo{position:relative;margin-bottom:12px}
-.lpCampo input{width:100%;box-sizing:border-box;font-family:inherit;font-size:17px;font-weight:600;padding:22px 14px 8px;border:2px solid #e2e8f0;border-radius:14px;background:#f8fafc;color:#0f172a;outline:none;transition:border .2s,background .2s}
-.lpCampo input:focus{border-color:#104D82;background:#fff}
-.lpCampo label{position:absolute;left:16px;top:16px;font-size:16px;color:#64748b;pointer-events:none;transition:all .18s;font-weight:600}
-.lpCampo input:focus+label,.lpCampo input:not(:placeholder-shown)+label{top:6px;font-size:11px;color:#104D82;letter-spacing:.04em;text-transform:uppercase}
-.lpPerg{font-weight:800;font-size:15px;margin:14px 0 8px;color:#0a2a55} .lpPerg small{font-weight:600;color:#94a3b8}
-.lpOpc{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.lpOpc button,.lpHor button{font-family:inherit;border:2px solid #e2e8f0;background:#f8fafc;border-radius:14px;cursor:pointer;color:#0f172a;transition:all .18s}
-.lpOpc button{padding:12px 10px;text-align:left;display:flex;flex-direction:column;gap:2px}
-.lpOpc .lpOi{font-size:24px} .lpOpc b{font-size:14px} .lpOpc small{font-size:11.5px;color:#64748b}
-.lpOpc button.on,.lpHor button.on{border-color:#EF3340;background:#fff1f2;box-shadow:0 6px 16px rgba(239,51,64,.18);transform:translateY(-2px)}
-.lpHor{display:flex;gap:8px} .lpHor button{flex:1;padding:12px 4px;font-weight:700;font-size:14px}
-.lpEnviar{margin-top:18px;max-width:none}
-.lp .erro{color:#dc2626;font-weight:700;text-align:center;min-height:18px;margin:8px 0 0}
-.lpLgpd{font-size:11.5px;color:#94a3b8;text-align:center;line-height:1.4;margin:6px 0 0}
-.lpOk{text-align:center;position:relative;padding:8px 0}
-.lpCheck{width:76px;height:76px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;font-size:42px;font-weight:900;display:flex;align-items:center;justify-content:center;animation:lpPop .6s cubic-bezier(.2,1.6,.4,1) both;box-shadow:0 12px 30px rgba(34,197,94,.4)}
-.lpWa{background:linear-gradient(135deg,#25D366,#128C7E);box-shadow:0 12px 30px rgba(37,211,102,.4)}
-.lpConf{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.lpConf i{position:absolute;top:-10px;left:var(--x);width:8px;height:14px;background:var(--c);border-radius:2px;animation:lpCai 1.8s ease-in var(--t) both}
-.lpRod{text-align:center;padding:24px 18px 10px;color:#aac0de;font-size:13px;line-height:1.6}
-.lpRod b{color:#fff} .lpLogoP{width:64px;opacity:.9} .lpHoras{font-size:12px}
-.lpFix{position:fixed;left:14px;right:14px;bottom:14px;z-index:20;text-decoration:none;text-align:center;font-weight:800;color:#fff;padding:16px;border-radius:16px;background:linear-gradient(135deg,#ff4d5a,#d81f2e);box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .3s,opacity .3s}
+.lpCampo input{width:100%;box-sizing:border-box;font-family:inherit;font-size:16px;font-weight:500;padding:22px 14px 8px;border:1px solid var(--lpBd);border-radius:10px;background:#fff;color:var(--lpTx);outline:none;transition:border-color .2s,box-shadow .2s}
+.lpCampo input:focus{border-color:#0d2547;box-shadow:0 0 0 3px rgba(13,37,71,.08)}
+.lpCampo label{position:absolute;left:15px;top:16px;font-size:15px;color:#8291a5;pointer-events:none;transition:all .16s}
+.lpCampo input:focus+label,.lpCampo input:not(:placeholder-shown)+label{top:7px;font-size:11px;font-weight:600;color:#0d2547;letter-spacing:.04em}
+.lpPerg{font-weight:600;font-size:14px;margin:20px 0 10px;color:var(--lpTx)} .lpPerg small{font-weight:400;color:#8291a5;margin-left:4px}
+.lpOpc{display:grid;gap:8px}
+.lpOpc button{display:flex;align-items:center;gap:14px;text-align:left;font-family:inherit;padding:14px;border:1px solid var(--lpBd);background:#fff;border-radius:10px;cursor:pointer;color:var(--lpTx);transition:border-color .18s,background .18s}
+.lpOpc i{flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid #b8c3d1;transition:all .18s}
+.lpOpc b{display:block;font-size:15px;font-weight:600} .lpOpc small{display:block;font-size:13px;color:var(--lpMu);margin-top:1px}
+.lpOpc button.on{border-color:var(--lpVm);background:#fff7f7} .lpOpc button.on i{border:5px solid var(--lpVm)}
+.lpHor{display:flex;gap:8px}
+.lpHor button{flex:1;font-family:inherit;padding:12px 4px;font-weight:500;font-size:14px;border:1px solid var(--lpBd);background:#fff;border-radius:10px;cursor:pointer;color:var(--lpTx);transition:all .18s}
+.lpHor button.on{border-color:#0d2547;background:#0d2547;color:#fff}
+.lpEnviar{margin-top:22px}
+.lp .erro{color:#c81e2c;font-weight:500;font-size:14px;text-align:center;min-height:18px;margin:10px 0 0}
+.lpLgpd{font-size:12px;color:#8291a5;text-align:center;line-height:1.5;margin:4px 0 0}
+.lpOk{text-align:center;padding:12px 0 4px}
+.lpCheck{width:64px;height:64px;border-radius:50%;margin:0 auto 18px;background:#e8f6ee;color:#15803d;display:flex;align-items:center;justify-content:center;animation:lpPop .5s cubic-bezier(.2,1.4,.4,1) both}
+.lpCheck svg{width:30px;height:30px;stroke-width:2.2}
+.lpWa{background:#1f9d55} .lpWa:hover{background:#18874a}
+.lpRod{max-width:560px;margin:0 auto;padding:56px 24px 16px;color:#9fb1c8;font-size:13px;line-height:1.6}
+.lpLogoP{width:56px;margin-bottom:18px;opacity:.95}
+.lpRodG{display:grid;grid-template-columns:1fr 1fr;gap:18px;border-top:1px solid rgba(255,255,255,.1);padding-top:18px}
+.lpRodG b{display:block;color:#fff;font-weight:600;margin-bottom:4px}
+.lpFix{position:fixed;left:16px;right:16px;bottom:16px;z-index:20;text-decoration:none;text-align:center;font-weight:600;color:#fff;padding:16px;border-radius:10px;background:var(--lpVm);box-shadow:0 10px 28px rgba(0,0,0,.35);transition:transform .3s,opacity .3s}
 .lpFix.esc{transform:translateY(140%);opacity:0}
-.rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease var(--d,0ms),transform .7s ease var(--d,0ms)} .rv.on{opacity:1;transform:none}
-@keyframes lpUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-@keyframes lpZoom{to{transform:scale(1.18)}}
-@keyframes lpFlut{50%{transform:translate(-40px,40px)}}
-@keyframes lpBrilho{to{background-position:300% 0}}
-@keyframes lpPulse{0%,100%{box-shadow:0 12px 30px rgba(239,51,64,.45),0 0 0 0 rgba(239,51,64,.5)}50%{box-shadow:0 12px 30px rgba(239,51,64,.45),0 0 0 14px rgba(239,51,64,0)}}
-@keyframes lpSeta{50%{transform:translate(-50%,8px)}}
-@keyframes lpPop{from{transform:scale(0)}to{transform:scale(1)}}
-@keyframes lpCai{to{transform:translateY(420px) rotate(540deg);opacity:0}}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease var(--d,0ms),transform .6s ease var(--d,0ms)} .rv.on{opacity:1;transform:none}
+@keyframes lpUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes lpZoom{to{transform:scale(1.12)}}
+@keyframes lpPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.lp *{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
 </style>
 </head>
@@ -1397,63 +1399,71 @@ async function telaForm(preview=false){
   const pnDiv=div?esc(div.nome.split(' ')[0]==='Prof.'||div.nome.split(' ')[0]==='Professor'?div.nome:div.nome.split(' ')[0]):'';
   const preco=isFinite(pub.precoMin)&&pub.precoMin>0?pub.precoMin:119.9;
   const capa=pub.fotoForm||'capa-form.jpg';
-  const OPC=[['Musculação','💪','Musculação','ganhar força e definir'],['Aulas coletivas','🔥','Aulas coletivas','Sky Race, Cardio, dança'],['Lutas / Sky Box','🥊','Lutas · Sky Box','queimar e extravasar'],['Ainda não sei','✨','Ainda não sei','quero conhecer tudo']];
-  if(!document.getElementById('lpFont')){ const l=document.createElement('link'); l.id='lpFont'; l.rel='stylesheet'; l.href='https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&display=swap'; document.head.appendChild(l); }
+  const OPC=[['Musculação','Musculação','Força, hipertrofia e definição'],['Aulas coletivas','Aulas coletivas','Sky Race, Sky Cardio e dança'],['Lutas / Sky Box','Sky Box','Treino de luta e condicionamento'],['Ainda não sei','Quero conhecer','Me ajudem a escolher']];
+  const ic=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const ICO={clima:'<path d="M12 3v18M5.6 6.6l12.8 10.8M3 12h18M5.6 17.4L18.4 6.6"/>',equip:'<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',equipe:'<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5c.9-3.1 3.2-4.8 6-4.8s5.1 1.7 6 4.8"/><path d="M15.5 5.3a3.2 3.2 0 0 1 0 6.4M17.5 14.9c1.7.6 2.9 2.2 3.5 4.6"/>',
+    solar:'<circle cx="12" cy="12" r="3.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/>',app:'<rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/>',pass:'<circle cx="12" cy="12" r="9"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/>',
+    seta:'<path d="M5 12h14M13 6l6 6-6 6"/>',ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>'};
+  const BEN=[['clima','Climatização total','1.000 m² com ar-condicionado em todos os ambientes'],['equip','Equipamentos de ponta','Linha completa de máquinas e pesos livres'],['equipe','Equipe no salão','Professores acompanhando o seu treino'],['solar','Energia solar','Estrutura moderna e sustentável'],['app','App SkyFit','Treino, agenda e evolução no celular'],['pass','Wellhub e TotalPass','Aceitamos os dois benefícios']];
+  const convite=div?(div.tipo==='rec'?`Convite de ${esc(div.nome)}, da recepção Sky Fit`:`Convite de ${esc(div.nome)}`):'';
+  if(!document.getElementById('lpFont')){ const l=document.createElement('link'); l.id='lpFont'; l.rel='stylesheet'; l.href='https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap'; document.head.appendChild(l); }
   document.body.classList.add('lpBody');
   $('#app').innerHTML=`<div class="lp">
     ${preview?'<button class="btn sm lpVoltar" id="fpVoltar">← Voltar ao app</button>':''}
     <section class="lpHero">
-      <div class="lpCapa" style="background-image:url('${esc(capa)}')"></div><div class="lpGlow"></div>
+      <div class="lpCapa" style="background-image:url('${esc(capa)}')"></div>
       <div class="lpHeroIn">
         <img src="${LOGO}" class="lpLogo" alt="Sky Fit Academia">
-        ${div?`<div class="lpConvite">💌 <b>${pnDiv}</b> te convidou para treinar na Sky Fit</div>`:''}
-        <div class="lpBadge">🎟️ AULA EXPERIMENTAL GRÁTIS</div>
-        <h1>Sua primeira aula na <span>melhor estrutura</span> de Rio Claro é por nossa conta.</h1>
-        <p class="lpSub">1.000 m² climatizados, equipamentos de ponta e equipe com você no treino. Venha sentir antes de decidir.</p>
-        <a href="#lpForm" class="lpCta pulse">Quero minha aula grátis →</a>
-        <div class="lpMini">⏱ Leva 20 segundos · sem compromisso</div>
+        ${convite?`<p class="lpConvite">${convite}</p>`:''}
+        <p class="lpEyebrow">Aula experimental gratuita</p>
+        <h1>Conheça a melhor <em>estrutura</em> de Rio Claro treinando nela.</h1>
+        <p class="lpSub">Agende uma aula sem custo na Sky Fit Park Palmeiras e conheça o espaço, os equipamentos e a equipe antes de decidir.</p>
+        <a href="#lpForm" class="lpCta">Agendar aula gratuita ${ic(ICO.seta)}</a>
+        <p class="lpMini">Cadastro em menos de 1 minuto · Sem compromisso</p>
       </div>
-      <div class="lpSeta">⌄</div>
     </section>
 
     <section class="lpSec">
+      <p class="lpEyebrow lpEsq">A academia</p>
+      <h2>Tudo o que você precisa para treinar bem</h2>
       <div class="lpGrid">
-        ${[['❄️','100% climatizada','treine no conforto, faça calor ou frio'],['🏋️','Equipamentos de ponta','máquinas novas e área ampla'],['👥','Equipe presente','professores no salão o tempo todo'],['☀️','Energia solar','academia moderna e sustentável'],['📱','App SkyFit','seu treino na palma da mão'],['🤝','Wellhub e TotalPass','aceitamos os dois']]
-          .map(([i,t,d],k)=>`<div class="lpCard rv" style="--d:${k*70}ms"><div class="lpIco">${i}</div><b>${t}</b><span>${d}</span></div>`).join('')}
+        ${BEN.map(([k,t,d],i)=>`<div class="lpCard rv" style="--d:${i*60}ms"><span class="lpIco">${ic(ICO[k])}</span><div><b>${t}</b><span>${d}</span></div></div>`).join('')}
       </div>
     </section>
 
     <section class="lpSec lpEsp rv">
-      <h2>4 espaços para você treinar do seu jeito</h2>
-      <div class="lpTags">${['Musculação','Sky Race','Sky Cardio','Sky Box'].map(t=>`<span>${t}</span>`).join('')}</div>
-      <p class="lpPreco">Planos a partir de <b>${moeda(preco)}</b>/mês</p>
+      <p class="lpEyebrow lpEsq">Espaços de treino</p>
+      <div class="lpEspL">${[['Musculação','Ampla área de força e hipertrofia'],['Sky Race','Treino em alta intensidade'],['Sky Cardio','Condicionamento e resistência'],['Sky Box','Luta e funcional']].map(([t,d],i)=>`<div><span>0${i+1}</span><b>${t}</b><small>${d}</small></div>`).join('')}</div>
+      <p class="lpPreco">Planos a partir de <b>${moeda(preco)}</b> por mês</p>
     </section>
 
     <section class="lpSec lpFormSec" id="lpForm">
       <div class="lpFormBox rv">
-        <h2>Garanta sua aula experimental</h2>
-        <p class="lpSub2">Preencha e a nossa equipe te chama no WhatsApp para marcar o melhor dia.</p>
+        <h2>Agende sua aula gratuita</h2>
+        <p class="lpSub2">Preencha os dados e a nossa equipe entra em contato pelo WhatsApp para combinar o melhor dia e horário.</p>
         <form id="fPub" novalidate>
-          <div class="lpCampo"><input id="pNome" required maxlength="70" autocomplete="given-name" placeholder=" "><label for="pNome">Seu nome</label></div>
+          <div class="lpCampo"><input id="pNome" required maxlength="70" autocomplete="given-name" placeholder=" "><label for="pNome">Nome</label></div>
           <div class="lpCampo"><input id="pWhats" required type="tel" inputmode="tel" maxlength="16" placeholder=" " autocomplete="tel"><label for="pWhats">WhatsApp com DDD</label></div>
-          <div class="lpPerg">O que você quer treinar?</div>
-          <div class="lpOpc" id="pInt">${OPC.map(([v,i,t,d])=>`<button type="button" data-v="${esc(v)}"><span class="lpOi">${i}</span><b>${t}</b><small>${d}</small></button>`).join('')}</div>
-          <div class="lpPerg">Melhor período para treinar <small>(opcional)</small></div>
-          <div class="lpHor" id="pHor">${['☀️ Manhã','🌤 Tarde','🌙 Noite'].map(h=>`<button type="button" data-v="${h.split(' ')[1]}">${h}</button>`).join('')}</div>
+          <div class="lpPerg">Qual é o seu objetivo?</div>
+          <div class="lpOpc" id="pInt">${OPC.map(([v,t,d])=>`<button type="button" data-v="${esc(v)}"><i></i><span><b>${t}</b><small>${d}</small></span></button>`).join('')}</div>
+          <div class="lpPerg">Período de preferência <small>opcional</small></div>
+          <div class="lpHor" id="pHor">${['Manhã','Tarde','Noite'].map(h=>`<button type="button" data-v="${h}">${h}</button>`).join('')}</div>
           <input id="pSite" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button class="lpCta lpEnviar" id="pBtn">Quero minha aula grátis 🎟️</button>
+          <button class="lpCta lpEnviar" id="pBtn">Agendar aula gratuita</button>
           <p class="erro" id="pErr"></p>
-          <p class="lpLgpd">🔒 Ao enviar, você autoriza a Sky Fit a falar com você pelo WhatsApp sobre a aula experimental. Seus dados não são compartilhados.</p>
+          <p class="lpLgpd">Ao enviar, você autoriza a Sky Fit a entrar em contato pelo WhatsApp sobre a aula experimental. Seus dados não são compartilhados com terceiros.</p>
         </form>
       </div>
     </section>
 
     <footer class="lpRod">
-      <img src="${LOGO}" alt="" class="lpLogoP">
-      <p><b>Sky Fit Park Palmeiras</b><br>Av. dos Costas, s/n · Jd. Res. das Palmeiras · Rio Claro-SP<br>a 300 m do Supermercado Examine</p>
-      <p class="lpHoras">Seg a Qui 5h–23h · Sex 5h–22h · Sáb 8h–18h · Dom e feriados 8h–14h</p>
+      <img src="${LOGO}" alt="Sky Fit Academia" class="lpLogoP">
+      <div class="lpRodG">
+        <div><b>Endereço</b><span>Av. dos Costas, s/n<br>Jd. Res. das Palmeiras · Rio Claro-SP<br>A 300 m do Supermercado Examine</span></div>
+        <div><b>Horários</b><span>Seg a qui · 5h às 23h<br>Sexta · 5h às 22h<br>Sábado · 8h às 18h<br>Domingo e feriados · 8h às 14h</span></div>
+      </div>
     </footer>
-    <a href="#lpForm" class="lpFix" id="lpFix">Quero minha aula grátis 🎟️</a>
+    <a href="#lpForm" class="lpFix" id="lpFix">Agendar aula gratuita</a>
   </div>`;
   if(preview) $('#fpVoltar').onclick=()=>{ S.previewForm=false; document.body.classList.remove('lpBody'); render(); };
   // capa: se a foto não existir, fica só o degradê
@@ -1462,7 +1472,9 @@ async function telaForm(preview=false){
   const io='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); } }),{threshold:.15}):null;
   document.querySelectorAll('.lp .rv').forEach(el=>io?io.observe(el):el.classList.add('on'));
   // botão fixo some quando o formulário aparece
-  if('IntersectionObserver' in window){ new IntersectionObserver(es=>es.forEach(e=>$('#lpFix')&&$('#lpFix').classList.toggle('esc',e.isIntersecting)),{threshold:.1}).observe($('#lpForm')); }
+  if('IntersectionObserver' in window){ const vis={}; const fx=$('#lpFix'); fx.classList.add('esc');
+    const ob=new IntersectionObserver(es=>{ es.forEach(e=>vis[e.target.id||'hero']=e.isIntersecting); fx&&fx.classList.toggle('esc',!!(vis.hero||vis.lpForm)); },{threshold:.05});
+    ob.observe($('#lpForm')); ob.observe($('.lpHero .lpCta')); }
   document.querySelectorAll('.lp a[href="#lpForm"]').forEach(a=>a.onclick=e=>{ e.preventDefault(); $('#lpForm').scrollIntoView({behavior:'smooth'}); setTimeout(()=>$('#pNome').focus({preventScroll:true}),600); });
   const escolhe=id=>$(id).onclick=e=>{ const b=e.target.closest('button'); if(!b) return; const on=!b.classList.contains('on'); $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); if(on||id==='#pInt') b.classList.add('on'); };
   escolhe('#pInt'); escolhe('#pHor');
@@ -1484,12 +1496,11 @@ async function telaForm(preview=false){
         chegadaEm:FV.serverTimestamp(),criadoEm:FV.serverTimestamp(),registradoPor:{uid:'form',nome:'Formulário'},
         historico:[{acao:'Cadastro pelo formulário',por:'Formulário',em:Date.now()}],viaForm:true});
       const w=(pub.whatsAcademia||'').replace(/\D/g,''), pn=nome.split(' ')[0];
-      $('#lpForm').querySelector('.lpFormBox').innerHTML=`<div class="lpOk"><div class="lpCheck">✓</div>
-        <h2>Pronto, ${esc(pn)}! 🎉</h2><p class="lpSub2">Sua aula experimental está garantida. Em instantes a nossa equipe te chama no WhatsApp para marcar o dia e o horário.</p>
-        ${w?`<a class="lpCta lpWa" href="https://wa.me/${w.length<=11?'55'+w:w}?text=${encodeURIComponent(`Olá! Sou ${pn}, acabei de me cadastrar e quero agendar minha aula experimental.`)}" target="_blank" rel="noopener">Falar no WhatsApp agora</a>`:''}
-        <div class="lpConf">${Array.from({length:18},(_,i)=>`<i style="--x:${(i*37)%100}%;--t:${(i%6)*0.12}s;--c:${['#EF3340','#104D82','#ffc107','#22c55e'][i%4]}"></i>`).join('')}</div></div>`;
+      $('#lpForm').querySelector('.lpFormBox').innerHTML=`<div class="lpOk"><div class="lpCheck">${ic(ICO.ok)}</div>
+        <h2>Cadastro recebido, ${esc(pn)}</h2><p class="lpSub2">A nossa equipe vai falar com você pelo WhatsApp em breve para agendar a sua aula gratuita.</p>
+        ${w?`<a class="lpCta lpWa" href="https://wa.me/${w.length<=11?'55'+w:w}?text=${encodeURIComponent(`Olá! Sou ${pn}, acabei de me cadastrar e quero agendar minha aula experimental.`)}" target="_blank" rel="noopener">Falar agora pelo WhatsApp</a>`:''}</div>`;
       $('#lpFix')&&$('#lpFix').remove();
-    }catch(err){ b.disabled=false; b.textContent='Quero minha aula grátis 🎟️'; $('#pErr').textContent='Não foi possível enviar. Tente de novo.'; }
+    }catch(err){ b.disabled=false; b.textContent='Agendar aula gratuita'; $('#pErr').textContent='Não foi possível enviar. Tente de novo.'; }
   };
 }
 
