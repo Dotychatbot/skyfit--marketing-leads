@@ -15,7 +15,11 @@ window.SKYFIT_CONFIG = {
   },
 
   // E-mail(s) que viram ADMINISTRADOR no primeiro login
-  admins: ["padotefabio@gmail.com"]
+  admins: ["padotefabio@gmail.com"],
+
+  // E-mail(s) do DESENVOLVEDOR: vê a aba 👨‍💻 Dev (chave da IA, módulos, erros).
+  // Também precisa estar em dev() no firestore.rules.
+  devs: ["padotefabio@gmail.com"]
 };
 
 // Configurado para o projeto skyfit-marketing.
