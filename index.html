@@ -652,7 +652,7 @@ auth.onAuthStateChanged(async u=>{
 
 const LS={get:k=>{ try{ return localStorage.getItem('skyfit_'+k); }catch(e){ return null; } },
   set:(k,v)=>{ try{ v==null?localStorage.removeItem('skyfit_'+k):localStorage.setItem('skyfit_'+k,v); }catch(e){} }};
-const PAPEIS_LOGIN={admin:['👑','Administrador'],recepcao:['🧾','Recepção'],agencia:['📣','Marketing']};
+const PAPEIS_LOGIN={recepcao:['🧾','Recepção'],agencia:['📣','Marketing'],admin:['👑','Administrador'],dev:['👨‍💻','Desenvolvedor']};
 let LOGINS_PUB=null;
 async function carregarLogins(){
   if(LOGINS_PUB) return LOGINS_PUB;
@@ -677,13 +677,13 @@ async function telaLogin(msg='',papel=LS.get('papel'),pessoa=null){
     document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ LS.set('papel',b.dataset.p); telaLogin('',b.dataset.p); });
     return ligarDemo();
   }
-  const [ic,titulo]=PAPEIS_LOGIN[papel]||['','']; 
+  const [ic,titulo]=PAPEIS_LOGIN[papel==='adminEmail'?'admin':papel]||['','']; 
   const voltar=`<button class="btn ghost sm voltar" id="lVoltar">← Trocar tipo de acesso</button>`;
-  // 2a) administrador: e-mail + senha + esqueci a senha
-  if(papel==='admin'){
+  // 2a) desenvolvedor (ou admin com e-mail): e-mail + senha + esqueci a senha
+  if(papel==='dev'||papel==='adminEmail'){
     $('#app').innerHTML=`<div class="login">${topo}<div class="papelTit">${ic} ${titulo}</div>
       <form id="fLogin">
-        <input type="email" id="lEmail" placeholder="E-mail do administrador" required autocomplete="username" value="${esc(LS.get('adminEmail')||'')}">
+        <input type="email" id="lEmail" placeholder="Seu e-mail" required autocomplete="username" value="${esc(LS.get('adminEmail')||'')}">
         <input type="password" id="lSenha" placeholder="Senha" required autocomplete="current-password">
         <button class="btn prim big">Entrar</button>
         <p class="erro">${esc(msg)}</p>
@@ -693,14 +693,14 @@ async function telaLogin(msg='',papel=LS.get('papel'),pessoa=null){
     $('#fLogin').onsubmit=e=>{ e.preventDefault(); const em=$('#lEmail').value.trim().toLowerCase(); LS.set('adminEmail',em); entrar(em,$('#lSenha').value,e.target.querySelector('button')); };
     $('#lEsqueci').onclick=async()=>{
       const em=$('#lEmail').value.trim().toLowerCase();
-      if(!em||!em.includes('@')) return telaLogin('Digite o seu e-mail de administrador e toque de novo em "Esqueci minha senha".','admin');
+      if(!em||!em.includes('@')) return telaLogin('Digite o seu e-mail e toque de novo em "Esqueci minha senha".',papel);
       try{ auth.languageCode='pt'; await auth.sendPasswordResetEmail(em); }catch(e){}
-      telaLogin('Se esse e-mail for de um administrador, chegou um link para criar uma senha nova. Confira também o spam.','admin');
+      telaLogin('Se esse e-mail estiver cadastrado, chegou um link para criar uma senha nova. Confira também o spam.',papel);
     };
     $('#lVoltar').onclick=()=>{ LS.set('papel',null); telaLogin('',''); };
     return ligarDemo();
   }
-  // 2b) recepção / marketing: escolhe o nome
+  // 2b) recepção / marketing / administrador: escolhe o nome
   if(!pessoa){
     $('#app').innerHTML=`<div class="login">${topo}<div class="papelTit">${ic} ${titulo}</div><p class="muted carregando">Carregando...</p></div>`;
     const lista=(await carregarLogins()).filter(x=>x.papel===papel).sort((a,b)=>a.nome.localeCompare(b.nome));
@@ -709,7 +709,9 @@ async function telaLogin(msg='',papel=LS.get('papel'),pessoa=null){
       <p class="muted" style="margin-bottom:12px">Toque no seu nome</p>
       <div class="nomes">${lista.map(x=>`<button class="nomeBtn ${x.usuario===ult?'ult':''}" data-u="${esc(x.usuario)}">${esc(x.nome)}</button>`).join('')
         ||'<p class="muted">Nenhum acesso cadastrado ainda. Fale com o administrador.</p>'}</div>
+      ${papel==='admin'?'<button class="link" id="lEmailAdm">Entrar com e-mail</button>':''}
       <p class="erro">${esc(msg)}</p>${voltar}${demo}</div>`;
+    if($('#lEmailAdm')) $('#lEmailAdm').onclick=()=>telaLogin('','adminEmail');
     document.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>telaLogin('',papel,lista.find(x=>x.usuario===b.dataset.u)));
     $('#lVoltar').onclick=()=>{ LS.set('papel',null); telaLogin('',''); };
     return ligarDemo();
@@ -732,7 +734,7 @@ async function telaLogin(msg='',papel=LS.get('papel'),pessoa=null){
 let _loginsJson=null;
 async function sincronizarLogins(){
   if(S.perfil?.papel!=='admin') return;
-  const lista=S.usuarios.filter(u=>u.ativo&&u.papel!=='admin').map(u=>({nome:u.nome,usuario:mostraLogin(u.email),papel:u.papel,uid:u.uid}))
+  const lista=S.usuarios.filter(u=>u.ativo&&!DEVS.includes((u.email||'').toLowerCase())).map(u=>({nome:u.nome,usuario:mostraLogin(u.email),papel:u.papel,uid:u.uid}))
     .sort((a,b)=>a.nome.localeCompare(b.nome));
   const js=JSON.stringify(lista); if(js===_loginsJson) return;
   try{ await db.collection('config').doc('publico').set({logins:lista},{merge:true}); _loginsJson=js; LOGINS_PUB=null; }catch(e){ console.warn('logins',e); }
@@ -2615,7 +2617,7 @@ function vEquipe(){
         <label>Nome<input id="uNome" required placeholder="Ex: Ana"></label>
         <label>Usuário (para entrar)<input id="uEmail" required placeholder="Ex: ana" autocapitalize="none" autocorrect="off"></label>
         <label>Senha (mín. 6)<input id="uSenha" type="text" minlength="6" required autocomplete="off"></label>
-        <label>Tipo<select id="uPapel"><option value="recepcao">Recepção</option><option value="admin">Administrador</option><option value="agencia">Agência (marketing)</option></select></label>
+        <label>Tipo<select id="uPapel"><option value="recepcao">Recepção</option><option value="admin">Administrador (dono / gerente)</option><option value="agencia">Agência (marketing)</option></select></label>
         <button class="btn prim">Cadastrar</button>
       </form></div>
     <p class="sm muted" style="margin:-4px 2px 12px">Só o administrador cria, vê e troca as senhas. A equipe e a agência entram com usuário e senha, sem e-mail.</p>
